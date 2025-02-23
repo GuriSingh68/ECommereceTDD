@@ -1,5 +1,6 @@
 package EGEN5203.EcommerceTDD.model;
 
+import EGEN5203.EcommerceTDD.enums.Roles;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,5 +27,6 @@ import lombok.Data;
     private String password;
 
     @Column(name = "ROLE")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Roles role;
 }

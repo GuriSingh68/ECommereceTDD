@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Signupdto {
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
-    private String password;
-    private Roles role;
+public class RoledetailsDTO {
+    String email;
+    Roles role;
 }
