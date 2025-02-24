@@ -33,7 +33,6 @@ class UserServiceTest {
         logindto.setEmail("abc@xyz.com");
         logindto.setPassword("password");
         when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user);
-        when(userRepo.existsByEmail(logindto.getEmail())).thenReturn(true);
         String result=userService.login(logindto);
         assertEquals("User login successfully",result);
     }
@@ -46,7 +45,6 @@ class UserServiceTest {
         logindto.setEmail("abc@xyz.com");
         logindto.setPassword("Invalid_password");
         when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user);
-        when(userRepo.existsByEmail(logindto.getEmail())).thenReturn(true);
         Exception exception=assertThrows(IllegalArgumentException.class, ()->
                 userService.login(logindto));
         assertEquals("Bad credentials",exception.getMessage());
