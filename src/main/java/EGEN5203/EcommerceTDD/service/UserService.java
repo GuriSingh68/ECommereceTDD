@@ -10,6 +10,8 @@ import EGEN5203.EcommerceTDD.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.naming.AuthenticationException;
+
 @Service
 public class UserService {
     @Autowired
@@ -52,21 +54,26 @@ public class UserService {
 
 
     public String updateRoles(RoledetailsDTO roledetailsDTO) {
-        if(roledetailsDTO.getRole().isBlank() || roledetailsDTO.getEmail().isBlank()){
-            throw new IllegalArgumentException("Enter valid details");
+        if(roledetailsDTO.getRole().equals(Roles.ADMIN)) {
+            if (roledetailsDTO.getRole().isBlank() || roledetailsDTO.getEmail().isBlank()) {
+                throw new IllegalArgumentException("Enter valid details");
+            }
+            Users user = userRepo.findByEmail(roledetailsDTO.getEmail());
+            if (user == null) {
+                throw new IllegalArgumentException("User not found");
+            }
+            if (user.getRole().equals(Roles.USER) || user.getRole().equals(Roles.ADMIN)) {
+                if (user.getRole().equals(roledetailsDTO.getRole())) {
+                    throw new IllegalArgumentException("Same role exist, choose a different role");
+                }
+                user.setRole(roledetailsDTO.getRole());
+                userRepo.save(user);
+                return "Role updated successfully for user :" + roledetailsDTO.getEmail();
+            }
+            throw new IllegalArgumentException("Error");
         }
-        Users user=userRepo.findByEmail(roledetailsDTO.getEmail());
-        if(user==null){
-            throw new IllegalArgumentException("User not found");
+        else {
+            throw new IllegalArgumentException("Not Authorised");
         }
-       if(user.getRole().equals(Roles.USER) || user.getRole().equals(Roles.ADMIN)) {
-           if(user.getRole().equals(roledetailsDTO.getRole())){
-               throw new IllegalArgumentException("Same role exist, choose a different role");
-           }
-           user.setRole(roledetailsDTO.getRole());
-           userRepo.save(user);
-           return "Role updated successfully for user :" + roledetailsDTO.getEmail();
-       }
-       throw new IllegalArgumentException("Error");
     }
 }
