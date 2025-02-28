@@ -98,7 +98,7 @@ class UserServiceTest {
         signupdto.setFirstName("");
         signupdto.setLastName("");
         signupdto.setPhoneNumber("");
-        signupdto.setRole(Roles.valueOf(""));
+        signupdto.setRole(Roles.USER);
         signupdto.setPassword("");
        Exception exception=assertThrows(IllegalArgumentException.class,()->{
            userService.userSignup(signupdto);
