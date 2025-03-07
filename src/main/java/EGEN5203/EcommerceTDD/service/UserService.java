@@ -84,7 +84,7 @@ public class UserService {
                 throw new IllegalArgumentException("User not present");
             }
             userRepo.delete(user);
-            return "User: "+ email+ " deleted successfully ";
+            return "User: "+ email+ " deleted successfully.";
         }
         throw new IllegalArgumentException("Unauthorised Access");
     }

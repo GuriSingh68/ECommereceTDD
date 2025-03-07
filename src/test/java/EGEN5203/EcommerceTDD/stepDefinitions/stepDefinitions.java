@@ -16,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Ensures mocks are initialized
@@ -34,6 +33,7 @@ public class stepDefinitions {
     private RoledetailsDTO roledetailsDTO;
     private String loginResult;
     private String userRole;
+    private String deleteResult;
     private Exception exception;
 
     public stepDefinitions() {
@@ -107,12 +107,12 @@ public class stepDefinitions {
         userRole = userService.updateRoles(roledetailsDTO);
     }
 
-//    @Then("the system should return {string}")
-//    public void the_system_should_return(String expectedMessage) {
-//        // Assert expected message and role update
-//        assertEquals(expectedMessage, userRole);
-//        assertEquals(roledetailsDTO.getRole(), user.getRole());
-//    }
+    @Then("the system should return {string}")
+    public void the_system_should_return(String expectedMessage) {
+        // Assert expected message and role update
+        assertEquals(expectedMessage, userRole);
+        assertEquals(roledetailsDTO.getRole(), user.getRole());
+    }
 //
 //    @When("the admin attempts to update the role of {string} to {string}")
 //    public void whenAdminAttemptsToUpdateNonExistentUser(String email, String newRole) {
@@ -130,5 +130,22 @@ public class stepDefinitions {
 //        assertNotNull(exception);
 //        assertEquals(expectedMessage, exception.getMessage());
 //    }
+    @Given("User exist in our database with email {string}")
+   public void userExistsInOurDatabase(String email){
+        Users user=new Users();
+        user.setEmail("abc@xyz.com");
+        when(userRepo.findByEmail(user.getEmail())).thenReturn(user);
+    }
+    @When("Admin tries to delete the {string} from our database")
+   public void adminDeleteUser(String email){
+        RoledetailsDTO roledetailsDTO1=new RoledetailsDTO();
+        roledetailsDTO1.setRole(Roles.ADMIN);
+        roledetailsDTO1.setEmail("user@xyz.com");
+        deleteResult=userService.deleteUsers(email,roledetailsDTO1);
+    }
+    @Then("the system successfully deletes the user")
+   public void successfulDeleteUser(){
+        Assertions.assertEquals("User: abc@xyz.com deleted successfully.",deleteResult);
+    }
 }
 
