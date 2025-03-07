@@ -5,10 +5,7 @@ import EGEN5203.EcommerceTDD.dto.RoledetailsDTO;
 import EGEN5203.EcommerceTDD.dto.Signupdto;
 import EGEN5203.EcommerceTDD.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UserController {
@@ -25,5 +22,9 @@ public class UserController {
     @PatchMapping("/updateRole")
     public String updateRole(@RequestBody RoledetailsDTO roledetailsDTO){
         return userService.updateRoles(roledetailsDTO);
+    }
+    @DeleteMapping("/users/{email}")
+    public String deleteUsers(@PathVariable String email,RoledetailsDTO roledetailsDTO){
+        return userService.deleteUsers(email,roledetailsDTO);
     }
 }

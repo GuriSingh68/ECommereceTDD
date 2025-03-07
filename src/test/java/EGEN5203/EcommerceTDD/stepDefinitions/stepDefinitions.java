@@ -1,6 +1,8 @@
 package EGEN5203.EcommerceTDD.stepDefinitions;
 
 import EGEN5203.EcommerceTDD.dto.Logindto;
+import EGEN5203.EcommerceTDD.dto.RoledetailsDTO;
+import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.Users;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
 import EGEN5203.EcommerceTDD.service.UserService;
@@ -14,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Ensures mocks are initialized
@@ -27,7 +31,10 @@ public class stepDefinitions {
 
     private Users user;
     private Logindto logindto;
+    private RoledetailsDTO roledetailsDTO;
     private String loginResult;
+    private String userRole;
+    private Exception exception;
 
     public stepDefinitions() {
         MockitoAnnotations.openMocks(this); // Initialize mocks
@@ -55,7 +62,7 @@ public class stepDefinitions {
 
     @Then("The login should be successful")
     public void successfulLogin() {
-        Assertions.assertEquals("User login successfully", loginResult);
+        assertEquals("User login successfully", loginResult);
     }
 
     @Given("No user exists with email {string}")
@@ -75,6 +82,53 @@ public class stepDefinitions {
     @Then("The login should fail with an error message {string}")
     public void invalidLoginException(String message){
 
-        Assertions.assertEquals("User not found",loginResult);
+        assertEquals("User not found",loginResult);
     }
+    @Given("an existing user with email {string} and role {string}")
+    public void an_existing_user_with_email_and_role(String email, String role) {
+        // Create user object with given email and role
+        user = new Users();
+        user.setEmail(email);
+        user.setRole(Roles.valueOf(role));
+
+        // Mock repository behavior
+        when(userRepo.findByEmail(email)).thenReturn(user);
+
+        // Create role details DTO
+        roledetailsDTO = new RoledetailsDTO();
+        roledetailsDTO.setEmail(email);
+        roledetailsDTO.setRole(Roles.valueOf(role));
+    }
+
+    @When("the admin updates the role of {string} to {string}")
+    public void the_admin_updates_the_role_of_to(String email, String newRole) {
+        // Set the new role in the DTO
+        roledetailsDTO.setRole(Roles.valueOf(newRole));
+        userRole = userService.updateRoles(roledetailsDTO);
+    }
+
+//    @Then("the system should return {string}")
+//    public void the_system_should_return(String expectedMessage) {
+//        // Assert expected message and role update
+//        assertEquals(expectedMessage, userRole);
+//        assertEquals(roledetailsDTO.getRole(), user.getRole());
+//    }
+//
+//    @When("the admin attempts to update the role of {string} to {string}")
+//    public void whenAdminAttemptsToUpdateNonExistentUser(String email, String newRole) {
+//        roledetailsDTO.setEmail(email);
+//        try {
+//            roledetailsDTO.setRole(Roles.valueOf(newRole));
+//            userRole = userService.updateRoles(roledetailsDTO);
+//        } catch (Exception e) {
+//            exception = e;
+//        }
+//    }
+//
+//    @Then("the system should return an error message {string}")
+//    public void thenSystemReturnsError(String expectedMessage) {
+//        assertNotNull(exception);
+//        assertEquals(expectedMessage, exception.getMessage());
+//    }
 }
+

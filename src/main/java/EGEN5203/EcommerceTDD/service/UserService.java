@@ -76,4 +76,16 @@ public class UserService {
             throw new IllegalArgumentException("Not Authorised");
         }
     }
+
+    public String deleteUsers(String email,RoledetailsDTO roledetailsDTO) {
+        if(roledetailsDTO.getRole().equals(Roles.ADMIN)){
+            Users user=userRepo.findByEmail(email);
+            if(user==null){
+                throw new IllegalArgumentException("User not present");
+            }
+            userRepo.delete(user);
+            return "User: "+ email+ " deleted successfully ";
+        }
+        throw new IllegalArgumentException("Unauthorised Access");
+    }
 }
