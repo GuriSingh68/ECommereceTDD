@@ -149,5 +149,36 @@ class UserServiceTest {
                 userService.updateRoles(roledetailsDTO));
         assertEquals("User not found",exception.getMessage());
     }
+    @Test
+    void deleteUser(){
+        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+        roledetailsDTO.setEmail("abc@xyz.com");
+        roledetailsDTO.setRole(Roles.ADMIN);
+        Users user=new Users();
+        user.setEmail("delete@user.com");
+//        when(userRepo.findByEmail(user.getEmail())).thenReturn(user);
+          userRepo.delete(user);
+    }
+    @Test
+    void adminDeletesNonExistingUser(){
+        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+        roledetailsDTO.setEmail("aaaaaa@aaa.com");
+        roledetailsDTO.setRole(Roles.ADMIN);
+       //when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(null);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.deleteUsers("nonexistent@user.com", roledetailsDTO);
+        });
+        assertEquals("User not present", exception.getMessage());
+    }
+    @Test
+    void userRoleDeletesExistingUser(){
+        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+        roledetailsDTO.setEmail("aaaaaa@aaa.com");
+        roledetailsDTO.setRole(Roles.USER);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.deleteUsers("nonexistent@user.com", roledetailsDTO);
+        });
+        assertEquals("Unauthorised Access", exception.getMessage());
+    }
 
 }
