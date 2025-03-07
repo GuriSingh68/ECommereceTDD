@@ -14,6 +14,10 @@ Feature: User Login
     Given an existing user with email "user@example.com" and role "USER"
     When the admin updates the role of "user@example.com" to "ADMIN"
     Then the system should return "Role updated successfully for user :user@example.com"
+  Scenario: Admin deleting a user
+    Given User exist in our database with email "abc@xyz.com"
+    When Admin tries to delete the "abc@xyz.com" from our database
+    Then the system successfully deletes the user
 
 
 
