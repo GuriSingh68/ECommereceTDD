@@ -43,18 +43,6 @@ public class ProductService {
         return "Product added successfully!";
     }
 
-    private void validateAddProductInput(AddProductsDto addProductsDTO) {
-        if (addProductsDTO.getProductName() == null || addProductsDTO.getProductName().isEmpty()) {
-            throw new IllegalArgumentException("Product name cannot be null or empty");
-        }
-        if (addProductsDTO.getPrice() <= 0) {
-            throw new IllegalArgumentException("Price must be greater than zero");
-        }
-        if (addProductsDTO.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
-        }
-    }
-
     public String updateProduct(Long id, String userid, AddProductsDto updateProductsDTO) {
         // Validate input
         validateAddProductInput(updateProductsDTO);
@@ -97,5 +85,17 @@ public class ProductService {
         // Delete the product by ID
         productRepo.deleteById(id);
         return "Product deleted successfully!";
+    }
+
+    private void validateAddProductInput(AddProductsDto addProductsDTO) {
+        if (addProductsDTO.getProductName() == null || addProductsDTO.getProductName().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty");
+        }
+        if (addProductsDTO.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
+        if (addProductsDTO.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
     }
 }

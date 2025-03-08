@@ -6,11 +6,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/products") // Base URL for product-related endpoints
 public class ProductController {
+
     @Autowired
     public ProductService productService;
-    @PostMapping("/addProducts/{username}")
-    public String addProducts(@PathVariable String username, @RequestBody AddProductsDto addProductsDTO){
-        return productService.addProducts(username,addProductsDTO);
+
+    @PostMapping("/add/{username}")
+    public String addProducts(@PathVariable String username, @RequestBody AddProductsDto addProductsDTO) {
+        return productService.addProducts(username, addProductsDTO);
+    }
+
+    @PutMapping("/update/{id}/{username}")
+    public String updateProduct(@PathVariable Long id, @PathVariable String username, @RequestBody AddProductsDto updateProductsDTO) {
+        return productService.updateProduct(id, username, updateProductsDTO);
+    }
+
+    @DeleteMapping("/delete/{id}/{username}")
+    public String deleteProduct(@PathVariable Long id, @PathVariable String username) {
+        return productService.deleteProduct(id, username);
     }
 }
