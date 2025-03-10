@@ -1,10 +1,13 @@
 package EGEN5203.EcommerceTDD.stepDefinitions;
 
+import EGEN5203.EcommerceTDD.dto.AddProductsDto;
 import EGEN5203.EcommerceTDD.dto.Logindto;
 import EGEN5203.EcommerceTDD.dto.RoledetailsDTO;
 import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.Users;
+import EGEN5203.EcommerceTDD.repo.ProductRepo;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
+import EGEN5203.EcommerceTDD.service.ProductService;
 import EGEN5203.EcommerceTDD.service.UserService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class) // Ensures mocks are initialized
@@ -24,6 +28,15 @@ public class stepDefinitions {
 
     @Mock
     private UserRepo userRepo;
+
+    @Mock
+    private ProductRepo productRepo; // Mocked repository for product data
+
+    @InjectMocks
+    private ProductService productService; // Service under test
+
+    private String resultMessage; // Result message from the service
+
 
     @InjectMocks
     private UserService userService; // Inject mock repo into service
@@ -146,6 +159,58 @@ public class stepDefinitions {
     @Then("the system successfully deletes the user")
    public void successfulDeleteUser(){
         Assertions.assertEquals("User: abc@xyz.com deleted successfully.",deleteResult);
+    }
+
+    @Given("A user with email {string} and role {string}")
+    public void a_user_with_email_and_role(String email, String role) {
+        user = new Users();
+        user.setEmail(email);
+        user.setRole(Roles.valueOf(role)); // Set the role based on the input
+        lenient().when(userRepo.findByEmail(email)).thenReturn(user);
+    }
+
+    @When("The user tries to add a product with name {string}, price {double}, and quantity {int}")
+    public void the_user_tries_to_add_a_product(String productName, double price, int quantity) {
+        // Create a DTO for adding products
+        AddProductsDto addProductsDto = new AddProductsDto();
+        addProductsDto.setProductName(productName); // This can be null
+        addProductsDto.setPrice(price);
+        addProductsDto.setQuantity(quantity);
+
+        // Attempt to add the product using the ProductService
+        try {
+            resultMessage = productService.addProducts(user.getEmail(), addProductsDto);
+        } catch (Exception e) {
+            exception = e; // Capture any exception that occurs
+        }
+    }
+
+    // New method to handle the case where product name is null
+    @When("The user tries to add a product with name null, price {double}, and quantity {int}")
+    public void the_user_tries_to_add_a_product_with_name_null_price_and_quantity(double price, int quantity) {
+        // Create a DTO for adding products with a null product name
+        AddProductsDto addProductsDto = new AddProductsDto();
+        addProductsDto.setProductName(null); // Explicitly set to null
+        addProductsDto.setPrice(price);
+        addProductsDto.setQuantity(quantity);
+
+        // Attempt to add the product using the ProductService
+        try {
+            resultMessage = productService.addProducts(user.getEmail(), addProductsDto);
+        } catch (Exception e) {
+            exception = e; // Capture any exception that occurs
+        }
+    }
+
+    @Then("The product should be added successfully")
+    public void the_product_should_be_added_successfully() {
+        Assertions.assertEquals("Product added successfully!", resultMessage);
+    }
+
+    @Then("The product addition should fail with an error message {string}")
+    public void the_product_addition_should_fail_with_an_error_message(String expectedMessage) {
+        Assertions.assertNotNull(exception, "Expected an exception but none was thrown.");
+        Assertions.assertEquals(expectedMessage, exception.getMessage());
     }
 }
 
