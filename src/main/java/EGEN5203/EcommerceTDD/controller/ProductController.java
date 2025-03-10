@@ -11,7 +11,10 @@ public class ProductController {
 
     @Autowired
     public ProductService productService;
-
+    @GetMapping("/productlist")
+    public String viewAllProducts(){
+        return productService.fetchAllProducts().toString();
+    }
     @PostMapping("/add/{username}")
     public String addProducts(@PathVariable String username, @RequestBody AddProductsDto addProductsDTO) {
         return productService.addProducts(username, addProductsDTO);
@@ -26,4 +29,5 @@ public class ProductController {
     public String deleteProduct(@PathVariable Long id, @PathVariable String username) {
         return productService.deleteProduct(id, username);
     }
+
 }

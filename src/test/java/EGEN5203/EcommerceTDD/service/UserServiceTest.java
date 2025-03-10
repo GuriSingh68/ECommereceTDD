@@ -20,165 +20,227 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
-    private UserRepo userRepo;
+    private UserRepo userRepo; // Mocking the UserRepo dependency
     @InjectMocks
-    private UserService userService;
+    private UserService userService; // Injecting the mocked UserRepo into UserService
+
     @Test
     void userSignup() {
+        // Test case for userSignup method (currently empty)
+        // Implementation needed
     }
 
     @Test
     void login() {
-        Users user=new Users();
+        // Arrange: Setting up the test data and mocking behavior
+        Users user = new Users();
         user.setEmail("abc@xyz.com");
         user.setPassword("password");
-        Logindto logindto=new Logindto();
+        Logindto logindto = new Logindto();
         logindto.setEmail("abc@xyz.com");
         logindto.setPassword("password");
-        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user);
-        String result=userService.login(logindto);
-        assertEquals("User login successfully",result);
+        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user); // Mocking the findByEmail method
+
+        // Act: Calling the method to be tested
+        String result = userService.login(logindto);
+
+        // Assert: Verifying the result
+        assertEquals("User login successfully", result);
     }
+
     @Test
-    void invalidCredentials(){
-        Users user=new Users();
+    void invalidCredentials() {
+        // Arrange
+        Users user = new Users();
         user.setEmail("abc@xyz.com");
         user.setPassword("password");
-        Logindto logindto=new Logindto();
+        Logindto logindto = new Logindto();
         logindto.setEmail("abc@xyz.com");
         logindto.setPassword("Invalid_password");
-        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user);
-        Exception exception=assertThrows(IllegalArgumentException.class, ()->
+        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user); // Mocking findByEmail
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
                 userService.login(logindto));
-        assertEquals("Bad credentials",exception.getMessage());
+        assertEquals("Bad credentials", exception.getMessage());
     }
+
     @Test
-    void nullValuesLogin(){
-        Users user=new Users();
+    void nullValuesLogin() {
+        // Arrange
+        Users user = new Users();
         user.setEmail("abc@xyz.com");
         user.setPassword("password");
-        Logindto logindto=new Logindto();
+        Logindto logindto = new Logindto();
         logindto.setEmail("");
         logindto.setPassword("");
-        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user);
-        Exception exception=assertThrows(IllegalArgumentException.class, ()->
+        when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user); // Mocking findByEmail
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
                 userService.login(logindto));
-        assertEquals("Enter valid credentials",exception.getMessage());
+        assertEquals("Enter valid credentials", exception.getMessage());
     }
+
     @Test
-    void testValidSignup(){
-        Signupdto signupdto=new Signupdto();
+    void testValidSignup() {
+        // Arrange
+        Signupdto signupdto = new Signupdto();
         signupdto.setEmail("user@example.com");
         signupdto.setFirstName("John");
         signupdto.setLastName("Doe");
         signupdto.setPhoneNumber("1234567890");
         signupdto.setRole(Roles.valueOf("USER"));
         signupdto.setPassword("password123");
-        when(userRepo.existsByEmail(signupdto.getEmail())).thenReturn(false);
-        String result=userService.userSignup(signupdto);
-        assertEquals("User signed up successfully!",result);
+        when(userRepo.existsByEmail(signupdto.getEmail())).thenReturn(false); // Mocking existsByEmail
+
+        // Act
+        String result = userService.userSignup(signupdto);
+
+        // Assert
+        assertEquals("User signed up successfully!", result);
     }
+
     @Test
-    void userAlreadyExists(){
-        Signupdto signupdto=new Signupdto();
+    void userAlreadyExists() {
+        // Arrange
+        Signupdto signupdto = new Signupdto();
         signupdto.setEmail("user@example.com");
         signupdto.setFirstName("John");
         signupdto.setLastName("Doe");
         signupdto.setPhoneNumber("1234567890");
         signupdto.setRole(Roles.valueOf("USER"));
         signupdto.setPassword("password123");
-        when(userRepo.existsByEmail(signupdto.getEmail())).thenReturn(true);
-        String result=userService.userSignup(signupdto);
-        assertEquals("Email already registered",result);
+        when(userRepo.existsByEmail(signupdto.getEmail())).thenReturn(true); // Mocking existsByEmail
+
+        // Act
+        String result = userService.userSignup(signupdto);
+
+        // Assert
+        assertEquals("Email already registered", result);
     }
+
     @Test
-    void userBlankValues(){
-        Signupdto signupdto=new Signupdto();
+    void userBlankValues() {
+        // Arrange
+        Signupdto signupdto = new Signupdto();
         signupdto.setEmail("");
         signupdto.setFirstName("");
         signupdto.setLastName("");
         signupdto.setPhoneNumber("");
         signupdto.setRole(Roles.USER);
         signupdto.setPassword("");
-       Exception exception=assertThrows(IllegalArgumentException.class,()->{
-           userService.userSignup(signupdto);
-       });
-       assertEquals("Enter valid input",exception.getMessage());
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.userSignup(signupdto);
+        });
+        assertEquals("Enter valid input", exception.getMessage());
     }
+
     @Test
-    void testUpdateRoles(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+    void testUpdateRoles() {
+        // Arrange
+        RoledetailsDTO roledetailsDTO = new RoledetailsDTO();
         roledetailsDTO.setEmail("abc@xyz.com");
         roledetailsDTO.setRole(Roles.ADMIN);
-        Users user=new Users();
+        Users user = new Users();
         user.setEmail("abc@xyz.com");
         user.setRole(Roles.USER);
-        when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(user);
-        String result=userService.updateRoles(roledetailsDTO);
-        assertEquals("Role updated successfully for user :"+roledetailsDTO.getEmail(),result);
+        when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(user); // Mocking findByEmail
+
+        // Act
+        String result = userService.updateRoles(roledetailsDTO);
+
+        // Assert
+        assertEquals("Role updated successfully for user :" + roledetailsDTO.getEmail(), result);
     }
+
     @Test
-    void testBlankDetails(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+    void testBlankDetails() {
+        // Arrange
+        RoledetailsDTO roledetailsDTO = new RoledetailsDTO();
         roledetailsDTO.setEmail("");
         roledetailsDTO.setRole(Roles.USER);
-//        assertEquals("Enter valid details",result);
-        Exception exception=assertThrows(IllegalArgumentException.class,() ->
-              userService.updateRoles(roledetailsDTO)  );
-        assertEquals("Enter valid details",exception.getMessage());
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateRoles(roledetailsDTO));
+        assertEquals("Enter valid details", exception.getMessage());
     }
+
     @Test
-    void testSameRole(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+    void testSameRole() {
+        // Arrange
+        RoledetailsDTO roledetailsDTO = new RoledetailsDTO();
         roledetailsDTO.setEmail("abc@xyz.com");
         roledetailsDTO.setRole(Roles.ADMIN);
-        Users user=new Users();
+        Users user = new Users();
         user.setEmail("abc@xyz.com");
         user.setRole(Roles.ADMIN);
-        when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(user);
-        Exception exception=assertThrows(IllegalArgumentException.class,() ->
+        when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(user); // Mocking findByEmail
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
                 userService.updateRoles(roledetailsDTO));
-        assertEquals("Same role exist, choose a different role",exception.getMessage());
+        assertEquals("Same role exist, choose a different role", exception.getMessage());
     }
+
     @Test
-    void testUserNotFound(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+    void testUserNotFound() {
+        // Arrange
+        RoledetailsDTO roledetailsDTO = new RoledetailsDTO();
         roledetailsDTO.setEmail("abc@xyz.com");
         roledetailsDTO.setRole(Roles.ADMIN);
-        Exception exception=assertThrows(IllegalArgumentException.class,() ->
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
                 userService.updateRoles(roledetailsDTO));
-        assertEquals("User not found",exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
     }
+
     @Test
-    void deleteUser(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
-        roledetailsDTO.setEmail("abc@xyz.com");
-        roledetailsDTO.setRole(Roles.ADMIN);
-        Users user=new Users();
+    void deleteUser() {
+        // Arrange
+        Users user = new Users();
         user.setEmail("delete@user.com");
-//        when(userRepo.findByEmail(user.getEmail())).thenReturn(user);
-          userRepo.delete(user);
+
+        // Act
+        userRepo.delete(user); // Directly calling the delete method of the mocked repo.
     }
+
     @Test
-    void adminDeletesNonExistingUser(){
-        RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+    void adminDeletesNonExistingUser() {
+        // Arrange
+        RoledetailsDTO roledetailsDTO = new RoledetailsDTO();
         roledetailsDTO.setEmail("aaaaaa@aaa.com");
         roledetailsDTO.setRole(Roles.ADMIN);
-       //when(userRepo.findByEmail(roledetailsDTO.getEmail())).thenReturn(null);
+
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             userService.deleteUsers("nonexistent@user.com", roledetailsDTO);
         });
         assertEquals("User not present", exception.getMessage());
     }
     @Test
+
     void userRoleDeletesExistingUser(){
+
         RoledetailsDTO roledetailsDTO=new RoledetailsDTO();
+
         roledetailsDTO.setEmail("aaaaaa@aaa.com");
+
         roledetailsDTO.setRole(Roles.USER);
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+
             userService.deleteUsers("nonexistent@user.com", roledetailsDTO);
+
         });
+
         assertEquals("Unauthorised Access", exception.getMessage());
+
     }
+
 
 }

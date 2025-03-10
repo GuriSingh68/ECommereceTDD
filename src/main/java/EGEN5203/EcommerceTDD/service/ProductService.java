@@ -9,6 +9,8 @@ import EGEN5203.EcommerceTDD.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProductService {
 
@@ -32,7 +34,6 @@ public class ProductService {
         if (!user.getRole().equals(Roles.ADMIN)) {
             throw new IllegalArgumentException("Only admin can add products");
         }
-
         // Create and save the product
         Product product = new Product();
         product.setProductName(addProductsDTO.getProductName());
@@ -97,5 +98,9 @@ public class ProductService {
         if (addProductsDTO.getQuantity() <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than zero");
         }
+    }
+
+    public List<Product> fetchAllProducts() {
+        return productRepo.findAll();
     }
 }
