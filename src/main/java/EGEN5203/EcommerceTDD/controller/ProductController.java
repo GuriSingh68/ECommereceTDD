@@ -19,7 +19,7 @@ public class ProductController {
     public String addProducts(@PathVariable String username, @RequestBody AddProductsDto addProductsDTO) {
         return productService.addProducts(username, addProductsDTO);
     }
-
+    //Jay Have make it patch request and not put because it will update the whole row
     @PutMapping("/update/{id}/{username}")
     public String updateProduct(@PathVariable Long id, @PathVariable String username, @RequestBody AddProductsDto updateProductsDTO) {
         return productService.updateProduct(id, username, updateProductsDTO);

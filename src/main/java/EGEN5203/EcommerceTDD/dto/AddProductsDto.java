@@ -6,4 +6,6 @@ import lombok.Data;
     private String productName;
     private double price;
     private Integer quantity;
+    private String category;
+    private String description;
 }
