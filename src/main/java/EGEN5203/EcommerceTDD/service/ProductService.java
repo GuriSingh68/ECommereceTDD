@@ -35,13 +35,20 @@ public class ProductService {
             throw new IllegalArgumentException("Only admin can add products");
         }
         // Create and save the product
-        Product product = new Product();
-        product.setProductName(addProductsDTO.getProductName());
-        product.setPrice(addProductsDTO.getPrice());
-        product.setQuantity(addProductsDTO.getQuantity());
-        productRepo.save(product);
+        Boolean productExist=productRepo.existsByProductName(addProductsDTO.getProductName());
+        if (!productExist)
+        {
+            Product product = new Product();
+            product.setProductName(addProductsDTO.getProductName());
+            product.setPrice(addProductsDTO.getPrice());
+            product.setQuantity(addProductsDTO.getQuantity());
+            product.setDescription(addProductsDTO.getDescription());
+            product.setCategory(addProductsDTO.getCategory());
+            productRepo.save(product);
 
-        return "Product added successfully!";
+            return "Product added successfully!";
+        }
+        return("Product Already Exist. Add different product");
     }
 
     public String updateProduct(Long id, String userid, AddProductsDto updateProductsDTO) {
