@@ -1,6 +1,7 @@
 package EGEN5203.EcommerceTDD.controller;
 
 import EGEN5203.EcommerceTDD.dto.AddProductsDto;
+import EGEN5203.EcommerceTDD.model.Product;
 import EGEN5203.EcommerceTDD.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,10 @@ public class ProductController {
     @GetMapping("/productlist")
     public String viewAllProducts(){
         return productService.fetchAllProducts().toString();
+    }
+    @GetMapping("/product/{productId}")
+    public Product getProductDetailsById(Long productId){
+        return productService.getDetailsById(productId);
     }
     @PostMapping("/add/{username}")
     public String addProducts(@PathVariable String username, @RequestBody AddProductsDto addProductsDTO) {

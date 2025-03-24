@@ -2,6 +2,7 @@ package EGEN5203.EcommerceTDD.service;
 
 import EGEN5203.EcommerceTDD.dto.AddToCartDto;
 import EGEN5203.EcommerceTDD.dto.UpdateCartDto;
+import EGEN5203.EcommerceTDD.dto.UpdateCartQuantityDto;
 import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.Cart;
 import EGEN5203.EcommerceTDD.model.Product;
@@ -9,12 +10,9 @@ import EGEN5203.EcommerceTDD.model.Users;
 import EGEN5203.EcommerceTDD.repo.CartRepo;
 import EGEN5203.EcommerceTDD.repo.ProductRepo;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class CartService {
@@ -27,6 +25,9 @@ public class CartService {
 
     @Transactional
     public String addItemsToCart(Long userid, AddToCartDto addToCartDto) {
+        // Find user
+        Users user = userRepo.findById(userid)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userid));
         // Basic validations
         if (userid == null || addToCartDto == null) {
             throw new IllegalArgumentException("Invalid Parameters");
@@ -43,9 +44,7 @@ public class CartService {
             return "Insufficient stock available!";
         }
 
-        // Find user
-        Users user = userRepo.findById(userid)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userid));
+
          //Find Product
         
         Cart cartItem = new Cart();
@@ -74,15 +73,18 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found with ID: " + cartId));
     }
     @Transactional(readOnly = true)
-    public Cart updateQuantity(Long cartId, UpdateCartDto updateCartDto){
-        if (cartId==null  || updateCartDto.getQuantity()==null){
-            throw new IllegalArgumentException("Fields cannot be null");
-        }
-            Cart cart = cartRepo.findById(cartId)
-                    .orElseThrow(() -> new IllegalArgumentException("Cart not found with ID: " + cartId));
+    public Cart updateQuantity(Long cartId, UpdateCartQuantityDto updateCartQuantityDto){
+        Cart cart = cartRepo.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found with ID: " + cartId));
+        Product product=productRepo.findById(cart.getProduct().getProduct_id())
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Product not found"));
 
+            if(product.getQuantity()< updateCartQuantityDto.getQuantity()){
+                throw new IllegalArgumentException("Not enough quantity");
+            }
             // Update quantity
-            cart.setQuantity(updateCartDto.getQuantity());
+            cart.setQuantity(updateCartQuantityDto.getQuantity());
 
             // Save updated cart
             return cartRepo.save(cart);
@@ -101,4 +103,37 @@ public class CartService {
        }
        return "Only admin can delete cart";
 }
+@Transactional
+    public Cart updateCartQuantity(Long cartId, Integer quantity) {
+            if (cartId ==null || quantity ==null){
+                throw new IllegalArgumentException("Cart id or Quantity cannot be null");
+            }
+            Cart cart=cartRepo.findById(cartId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cart cannot found"));
+            cart.setQuantity(quantity);
+            return cart;
+    }
+
+    public Cart updateCartItems(Long cartId, Long userId, UpdateCartDto updateCartDto) {
+        Users user=userRepo.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("User not found")
+        );
+        Cart cart=cartRepo.findById(cartId).orElseThrow(
+                () -> new IllegalArgumentException("Cart not found")
+        );
+        if (user.getRole().equals(Roles.ADMIN)){
+
+           if (updateCartDto.getQuantity() !=null){
+               cart.setQuantity(updateCartDto.getQuantity());
+           }
+           if (updateCartDto.getProductName() !=null){
+               cart.setProductName(updateCartDto.getProductName());
+           }
+           if (updateCartDto.getPrice()!=null){
+               cart.setPrice(updateCartDto.getPrice());
+           }
+            return cartRepo.save(cart);
+        }
+        throw new IllegalArgumentException("Only admin can change these fields");
+    }
 }

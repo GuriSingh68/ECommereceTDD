@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCartDto  {
-    private String productName;
+public class UpdateCartQuantityDto {
     private Integer quantity;
-    private Double price;
 }

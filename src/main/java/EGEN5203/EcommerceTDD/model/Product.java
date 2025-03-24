@@ -3,10 +3,18 @@ package EGEN5203.EcommerceTDD.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(name = "Product")
-@Data public class Product {
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")  // Defines the column name in the database

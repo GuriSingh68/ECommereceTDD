@@ -38,12 +38,13 @@ public class ProductService {
         Boolean productExist=productRepo.existsByProductName(addProductsDTO.getProductName());
         if (!productExist)
         {
-            Product product = new Product();
-            product.setProductName(addProductsDTO.getProductName());
-            product.setPrice(addProductsDTO.getPrice());
-            product.setQuantity(addProductsDTO.getQuantity());
-            product.setDescription(addProductsDTO.getDescription());
-            product.setCategory(addProductsDTO.getCategory());
+            Product product=Product.builder()
+                    .productName(addProductsDTO.getProductName())
+                    .price(addProductsDTO.getPrice())
+                    .description(addProductsDTO.getDescription())
+                    .category(addProductsDTO.getCategory())
+                    .quantity(addProductsDTO.getQuantity())
+                    .build();
             productRepo.save(product);
 
             return "Product added successfully!";
@@ -109,5 +110,17 @@ public class ProductService {
 
     public List<Product> fetchAllProducts() {
         return productRepo.findAll();
+    }
+
+    public Product getDetailsById(Long productId) {
+        Product product=productRepo.findById(productId).
+                orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return Product.builder().
+                        productName(product.getProductName())
+                        .price(product.getPrice())
+                .description(product.getDescription())
+                .quantity(product.getQuantity())
+                .category(product.getCategory())
+                .build();
     }
 }

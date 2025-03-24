@@ -2,9 +2,9 @@ package EGEN5203.EcommerceTDD.controller;
 
 import EGEN5203.EcommerceTDD.dto.AddToCartDto;
 import EGEN5203.EcommerceTDD.dto.UpdateCartDto;
+import EGEN5203.EcommerceTDD.dto.UpdateCartQuantityDto;
 import EGEN5203.EcommerceTDD.model.Cart;
 import EGEN5203.EcommerceTDD.service.CartService;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +21,16 @@ public class CartController {
         return cartService.viewUserCart(cartId);
     }
     @PatchMapping("/updateCart/{cartId}")
-    public Cart updateCart(@PathVariable long cartId,@RequestBody UpdateCartDto updateCartDto){
-        return cartService.updateQuantity(cartId,updateCartDto);
+    public Cart updateCarQuantity(@PathVariable long cartId,@RequestBody UpdateCartQuantityDto updateCartQuantityDto){
+        return cartService.updateQuantity(cartId, updateCartQuantityDto);
     }
     @DeleteMapping("/deleteCart/{cartId}/{userId}")
     public String deleteCart(@PathVariable long cartId,@PathVariable long userId){
         return cartService.deleteCart(cartId,userId);
+    }
+    @PatchMapping("/admin/updateCart/{cartId}/{userId}")
+     public Cart updateCart(@PathVariable Long cartId,
+                            @PathVariable Long userId,@RequestBody UpdateCartDto updateCartDto){
+        return cartService.updateCartItems(cartId,userId,updateCartDto);
     }
 }
