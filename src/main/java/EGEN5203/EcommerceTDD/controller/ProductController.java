@@ -6,6 +6,8 @@ import EGEN5203.EcommerceTDD.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products") // Base URL for product-related endpoints
 public class ProductController {
@@ -13,8 +15,8 @@ public class ProductController {
     @Autowired
     public ProductService productService;
     @GetMapping("/productlist")
-    public String viewAllProducts(){
-        return productService.fetchAllProducts().toString();
+    public List<Product> viewAllProducts() {
+        return productService.fetchAllProducts();
     }
     @GetMapping("/product/{productId}")
     public Product getProductDetailsById(Long productId){

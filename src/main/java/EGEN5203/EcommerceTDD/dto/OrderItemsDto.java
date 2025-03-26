@@ -3,7 +3,7 @@ package EGEN5203.EcommerceTDD.dto;
 import lombok.Data;
 
 @Data
-public class AddToCartDto {
-    private String productName;
+public class OrderItemsDto {
+    private Long productId;
     private Integer quantity;
 }
