@@ -2,10 +2,13 @@ package EGEN5203.EcommerceTDD.service;
 
 import EGEN5203.EcommerceTDD.dto.CreateOrderDto;
 import EGEN5203.EcommerceTDD.dto.OrderItemsDto;
+import EGEN5203.EcommerceTDD.dto.UpdateOrdersDto;
 import EGEN5203.EcommerceTDD.enums.OrderStatus;
 import EGEN5203.EcommerceTDD.enums.PaymentStatus;
+import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.*;
 import EGEN5203.EcommerceTDD.repo.OrderRepo;
+import EGEN5203.EcommerceTDD.repo.PaymentRepo;
 import EGEN5203.EcommerceTDD.repo.ProductRepo;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,8 @@ public class OrderService {
     private OrderRepo orderRepo;
 @Autowired
     private PaymentService paymentService;
+@Autowired
+    private PaymentRepo paymentRepo;
 @Transactional
 public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
     // Validate order items
@@ -117,5 +122,38 @@ public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
 
         order.setStatus(OrderStatus.CANCELLED);
         return orderRepo.save(order);
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll();
+    }
+
+    public Order fetchOrdersById(Long id) {
+       Order order=orderRepo.findById(Math.toIntExact(id))
+               .orElseThrow(() ->
+                    new  IllegalArgumentException("Order not found")
+               );
+       return order;
+    }
+
+    public Order deleteOrder(Long orderId) {
+         paymentRepo.deleteById(Math.toIntExact(orderId));
+        Order order=orderRepo.findById(Math.toIntExact(orderId))
+                .orElseThrow(() -> new  IllegalArgumentException("Order not found"));
+        
+        orderRepo.deleteById(Math.toIntExact(orderId));
+        return order;
+    }
+
+    public Order updateOrderStatus(Integer userId, UpdateOrdersDto orderStatus) {
+        Users user=userRepo.findById(Long.valueOf(userId)).
+                orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole().equals(Roles.ADMIN)){
+            Order order=orderRepo.findById(orderStatus.getOrderId())
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+            order.setStatus(orderStatus.getStatus());
+           return orderRepo.save(order);
+        }
+        throw new IllegalArgumentException("You are not authorised to update order status");
     }
 }
