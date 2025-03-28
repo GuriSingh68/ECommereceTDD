@@ -23,4 +23,4 @@ Feature: Add Products
   Scenario: Admin tries to add a product with negative quantity
     Given A user with email "admin@example.com" and role "ADMIN"
     When The user tries to add a product with name "Test Product", price 100.0, and quantity -5
-    Then The product addition should fail with an error message "Quantity must be greater than zero"
+    Then The product addition should fail with an error message "Stock cannot be negative"

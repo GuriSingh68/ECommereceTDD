@@ -4,6 +4,7 @@ import EGEN5203.EcommerceTDD.dto.Logindto;
 import EGEN5203.EcommerceTDD.dto.RoledetailsDTO;
 import EGEN5203.EcommerceTDD.dto.Signupdto;
 import EGEN5203.EcommerceTDD.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class UserController {
         return  userService.userSignup(signupdto);
     }
     @PostMapping("/login")
-    public String login(@RequestBody Logindto logindto){
+    public String login(@RequestBody Logindto logindto) throws JsonProcessingException {
         return userService.login(logindto);
     }
     @PatchMapping("/updateRole")

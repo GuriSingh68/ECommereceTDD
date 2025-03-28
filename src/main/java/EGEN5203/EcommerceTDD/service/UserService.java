@@ -7,6 +7,8 @@ import EGEN5203.EcommerceTDD.dto.Signupdto;
 import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.Users;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,7 @@ public class UserService {
     private UserRepo userRepo;
     public String userSignup(Signupdto signupdto){
     if(userRepo.existsByEmail(signupdto.getEmail())){
-        return "Email already registered";
+        return "{\"error\": \"Email already registered\"}";
     }
     if(signupdto.getEmail().isBlank()||signupdto.getFirstName().isBlank()||signupdto.getLastName().isBlank()||signupdto.getPassword().isBlank()||signupdto.getRole().isBlank()||signupdto.getPhoneNumber().isBlank()){
         throw new IllegalArgumentException("Enter valid input");
@@ -31,25 +33,28 @@ public class UserService {
         user.setRole(signupdto.getRole());
         user.setPassword(signupdto.getPassword());
         userRepo.save(user);
-        return "User signed up successfully!";
+        return "{\"message\": \"User signed up successfully!\"}";
     }
 
-    public String login(Logindto logindto) {
-        Users user=userRepo.findByEmail(logindto.getEmail());
-        if (user ==null){
-            throw new IllegalArgumentException("User not found");
-
-        }
-        if(logindto.getEmail().isBlank()|| logindto.getPassword().isBlank()){
+    public String login(Logindto logindto) throws JsonProcessingException {
+        // Check if email or password is blank
+        if (logindto.getEmail().isBlank() || logindto.getPassword().isBlank()) {
             throw new IllegalArgumentException("Enter valid credentials");
         }
 
-        if(user.getEmail().equals(logindto.getEmail())){
-            if( user.getPassword().equals(logindto.getPassword())){
-                return "User login successfully";
-            }
+        // Find user by email
+        Users user = userRepo.findByEmail(logindto.getEmail());
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
         }
-        throw new IllegalArgumentException("Bad credentials");
+
+        // Check if the password matches
+        if (!user.getPassword().equals(logindto.getPassword())) {
+            throw new IllegalArgumentException("Bad credentials");
+        }
+
+        // Return user details as JSON
+        return "{\"user\": " + new ObjectMapper().writeValueAsString(user) + "}";
     }
 
 

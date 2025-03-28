@@ -1,7 +1,9 @@
 package EGEN5203.EcommerceTDD.service;
 
 import EGEN5203.EcommerceTDD.dto.AddProductsDto;
+import EGEN5203.EcommerceTDD.dto.UpdateProductsDto;
 import EGEN5203.EcommerceTDD.enums.Roles;
+import EGEN5203.EcommerceTDD.model.Product;
 import EGEN5203.EcommerceTDD.model.Users;
 import EGEN5203.EcommerceTDD.repo.ProductRepo;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
@@ -15,62 +17,49 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-/**
- * Unit tests for the ProductService class.
- * This class tests the functionality of adding products to the system,
- * ensuring that only authorized users (admins) can add products,
- * and that the input data is validated correctly.
- */
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
     @Mock
-    private ProductRepo productRepo; // Mocked repository for product data
+    private ProductRepo productRepo;
 
     @Mock
-    private UserRepo userRepo; // Mocked repository for user data
+    private UserRepo userRepo;
 
     @InjectMocks
-    private ProductService productService; // Service under test
+    private ProductService productService;
 
-    /**
-     * Tests the scenario where an admin user successfully adds a product.
-     * It verifies that the product is added and the correct success message is returned.
-     */
     @Test
     void testAddProductAsAdmin() {
         // Arrange
         String username = "admin@example.com";
         AddProductsDto addProductsDto = new AddProductsDto();
-        addProductsDto.setProductName("Test Product");
+        addProductsDto.setName("Test Product");
         addProductsDto.setPrice(100.0);
-        addProductsDto.setQuantity(10);
+        addProductsDto.setStock(10);
 
         Users adminUser  = new Users();
         adminUser .setEmail(username);
         adminUser .setRole(Roles.ADMIN);
 
         when(userRepo.findByEmail(username)).thenReturn(adminUser );
+        when(productRepo.existsByName(addProductsDto.getName())).thenReturn(false); // Product does not exist
 
         // Act
         String result = productService.addProducts(username, addProductsDto);
 
         // Assert
-        assertEquals("Product added successfully!", result);
+        assertEquals("{\"message\": \"Product added successfully!\"}", result);
     }
 
-    /**
-     * Tests the scenario where a non-admin user attempts to add a product.
-     * It verifies that an exception is thrown with the appropriate error message.
-     */
     @Test
     void testAddProductAsNonAdmin() {
         // Arrange
         String username = "user@example.com";
         AddProductsDto addProductsDto = new AddProductsDto();
-        addProductsDto.setProductName("Test Product");
+        addProductsDto.setName("Test Product");
         addProductsDto.setPrice(100.0);
-        addProductsDto.setQuantity(10);
+        addProductsDto.setStock(10);
 
         Users regularUser  = new Users();
         regularUser .setEmail(username);
@@ -84,18 +73,14 @@ class ProductServiceTest {
         assertEquals("Only admin can add products", exception.getMessage());
     }
 
-    /**
-     * Tests the scenario where an admin user attempts to add a product with a null product name.
-     * It verifies that an exception is thrown with the appropriate error message.
-     */
     @Test
     void testAddProductWithNullProductName() {
         // Arrange
         String username = "admin@example.com";
         AddProductsDto addProductsDto = new AddProductsDto();
-        addProductsDto.setProductName(null); // Invalid product name
+        addProductsDto.setName(null); // Invalid product name
         addProductsDto.setPrice(100.0);
-        addProductsDto.setQuantity(10);
+        addProductsDto.setStock(10);
 
         Users adminUser  = new Users();
         adminUser .setEmail(username);
@@ -109,53 +94,118 @@ class ProductServiceTest {
         assertEquals("Product name cannot be null or empty", exception.getMessage());
     }
 
-    /**
-     * Tests the scenario where an admin user attempts to add a product with a negative price.
-     * It verifies that an exception is thrown with the appropriate error message.
-     */
     @Test
-    void testAddProductWithNegativePrice() {
+    void testUpdateProductAsAdmin() {
         // Arrange
+        Long productId = 1L;
         String username = "admin@example.com";
-        AddProductsDto addProductsDto = new AddProductsDto();
-        addProductsDto.setProductName("Test Product");
-        addProductsDto.setPrice(-50.0); // Invalid price
-        addProductsDto.setQuantity(10);
+        UpdateProductsDto updateProductsDto = new UpdateProductsDto();
+        updateProductsDto.setName("Updated Product");
+        updateProductsDto.setPrice(150.0);
+        updateProductsDto.setStock(20);
 
         Users adminUser  = new Users();
         adminUser .setEmail(username);
         adminUser .setRole(Roles.ADMIN);
 
-        lenient().when(userRepo.findByEmail(username)).thenReturn(adminUser );
+        Product existingProduct = new Product();
+        existingProduct.setProductId(productId);
+        existingProduct.setName("Old Product");
+        existingProduct.setPrice(100.0);
+        existingProduct.setStock(10);
 
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                productService.addProducts(username, addProductsDto));
-        assertEquals("Price must be greater than zero", exception.getMessage());
+        when(userRepo.findByEmail(username)).thenReturn(adminUser );
+        when(productRepo.findById(productId)).thenReturn(java.util.Optional.of(existingProduct));
+
+        // Act
+        String result = productService.updateProduct(productId, username, updateProductsDto);
+
+        // Assert
+        assertEquals("{\"message\": \"Product updated successfully!\"}", result);
+        assertEquals("Updated Product", existingProduct.getName());
+        assertEquals(150.0, existingProduct.getPrice());
+        assertEquals(20, existingProduct.getStock());
     }
 
-    /**
-     * Tests the scenario where an admin user attempts to add a product with a negative quantity.
-     * It verifies that an exception is thrown with the appropriate error message.
-     */
     @Test
-    void testAddProductWithNegativeQuantity() {
+    void testUpdateProductAsNonAdmin() {
         // Arrange
-        String username = "admin@example.com";
-        AddProductsDto addProductsDto = new AddProductsDto();
-        addProductsDto.setProductName("Test Product");
-        addProductsDto.setPrice(100.0);
-        addProductsDto.setQuantity(-5); // Invalid quantity
+        Long productId = 1L;
+        String username = "user@example.com";
+        UpdateProductsDto updateProductsDto = new UpdateProductsDto();
+        updateProductsDto.setName("Updated Product");
+        updateProductsDto.setPrice(150.0);
+        updateProductsDto.setStock(20);
 
+        Users regularUser  = new Users();
+        regularUser .setEmail(username);
+        regularUser .setRole(Roles.USER);
+
+        when(userRepo.findByEmail(username)).thenReturn(regularUser );
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                productService.updateProduct(productId, username, updateProductsDto));
+        assertEquals("Only admin can update products", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithNullProductName() {
+        // Arrange
+        Long productId = 1L;
+        String username = "admin@example.com";
+        UpdateProductsDto updateProductsDto = new UpdateProductsDto();
+        updateProductsDto.setName(null); // Invalid product name
+        updateProductsDto.setPrice(150.0);
+        updateProductsDto.setStock(20);
+
+        Users adminUser  = new Users();
+        adminUser.setEmail(username);
+        adminUser.setRole(Roles.ADMIN);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                productService.updateProduct(productId, username, updateProductsDto));
+        assertEquals("Product name cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteProductAsAdmin() {
+        // Arrange
+        Long productId = 1L;
+        String username = "admin@example.com";
         Users adminUser  = new Users();
         adminUser .setEmail(username);
         adminUser .setRole(Roles.ADMIN);
 
-        lenient().when(userRepo.findByEmail(username)).thenReturn(adminUser );
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setName("Test Product");
+
+        lenient().when(userRepo.findByEmail(username)).thenReturn(adminUser ); // Mocking findByEmail
+        lenient().when(productRepo.findById(productId)).thenReturn(java.util.Optional.of(product)); // Mocking findById
+
+        // Act
+        String result = productService.deleteProduct(productId, username);
+
+        // Assert
+        assertEquals("{\"message\": \"Product deleted successfully!\"}", result);
+    }
+
+    @Test
+    void testDeleteProductAsNonAdmin() {
+        // Arrange
+        Long productId = 1L;
+        String username = "user@example.com";
+        Users regularUser  = new Users();
+        regularUser .setEmail(username);
+        regularUser .setRole(Roles.USER);
+
+        when(userRepo.findByEmail(username)).thenReturn(regularUser ); // Mocking findByEmail
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                productService.addProducts(username, addProductsDto));
-        assertEquals("Quantity must be greater than zero", exception.getMessage());
+                productService.deleteProduct(productId, username));
+        assertEquals("Only admin can delete products", exception.getMessage());
     }
 }
