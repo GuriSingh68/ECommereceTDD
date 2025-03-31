@@ -24,19 +24,21 @@ public class PaymentService {
         private UserRepo userRepo;
     @Transactional
     public Payments processPayment(Order order) {
-        //Create a new Payment
-        Payments payment=new Payments();
+        if (order == null) {
+            throw new NullPointerException("Received a null order in processPayment!");
+        }
+
+        System.out.println("Processing payment for Order ID: " + order.getId());
+
+        Payments payment = new Payments();
         payment.setOrder(order);
         payment.setAmount(order.getTotalPrice());
         payment.setPaymentDate(LocalDateTime.now());
-
-        // Always set status to SUCCESS as per requirement
         payment.setStatus(PaymentStatus.SUCCESS);
 
-        // Save the payment record
         return paymentRepo.save(payment);
     }
-    // Additional method to simulate card processing (if needed)
+    // Additional method to simulate card processing
     public Payments processCardPayment(String cardNumber, String cvv, Double amount) {
         //  just simulating a successful payment
         Payments payment = new Payments();
@@ -56,23 +58,27 @@ public class PaymentService {
     public Payments getPaymentsById(Integer paymentId,Long userId) {
         Users users = getUsers(userId);
 
-        if (isAdmin(users)) {
+        if (isAdmin(users.getRole())) {
             return getPayments(paymentId);
         }
         throw new IllegalArgumentException("Only admin access");
     }
     public Payments updatePaymentStatus(Integer paymentId, Long userId, UpdatePaymentStatusDto status) {
-        Users users = getUsers(userId);
-        Payments payments=getPayments(paymentId);
-        if (isAdmin(users)){
-            payments.setStatus(status.getPaymentStatus());
-            paymentRepo.save(payments);
-        }
-        throw new IllegalArgumentException("Cannot update payment status...User needs admin role");
+       Users users=userRepo.findById(userId).orElseThrow(
+               () -> new IllegalArgumentException("User not found")
+       );
+       Payments payments=paymentRepo.findById(paymentId).orElseThrow(
+               () -> new IllegalArgumentException("Payment not found")
+       );
+       if (Roles.ADMIN.equals(users.getRole())){
+           payments.setStatus(status.getPaymentStatus());
+          return paymentRepo.save(payments);
+       }
+       throw new IllegalArgumentException("Error occured while update");
     }
 
-    private static boolean isAdmin(Users users) {
-        return users.getRole().equals(Roles.ADMIN);
+    private static boolean isAdmin(Roles users) {
+        return users.equals(Roles.ADMIN);
     }
 
     private Payments getPayments(Integer paymentId) {
@@ -87,6 +93,5 @@ public class PaymentService {
         );
         return users;
     }
-
 
 }

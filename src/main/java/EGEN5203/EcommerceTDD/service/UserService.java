@@ -34,19 +34,16 @@ public class UserService {
         return "User signed up successfully!";
     }
 
-    public String login(Logindto logindto) {
+    public Users login(Logindto logindto) {
         Users user=userRepo.findByEmail(logindto.getEmail());
-        if (user ==null){
-            throw new IllegalArgumentException("User not found");
-
-        }
+        if (user ==null){throw new IllegalArgumentException("User not found");}
         if(logindto.getEmail().isBlank()|| logindto.getPassword().isBlank()){
             throw new IllegalArgumentException("Enter valid credentials");
         }
 
         if(user.getEmail().equals(logindto.getEmail())){
             if( user.getPassword().equals(logindto.getPassword())){
-                return "User login successfully";
+                return user;
             }
         }
         throw new IllegalArgumentException("Bad credentials");
@@ -55,8 +52,7 @@ public class UserService {
 
     public String updateRoles(RoledetailsDTO roledetailsDTO) {
         if(roledetailsDTO.getRole().equals(Roles.ADMIN)) {
-            if (roledetailsDTO.getRole().isBlank() || roledetailsDTO.getEmail().isBlank()) {
-                throw new IllegalArgumentException("Enter valid details");
+            if (roledetailsDTO.getRole().isBlank() || roledetailsDTO.getEmail().isBlank()) {throw new IllegalArgumentException("Enter valid details");
             }
             Users user = userRepo.findByEmail(roledetailsDTO.getEmail());
             if (user == null) {

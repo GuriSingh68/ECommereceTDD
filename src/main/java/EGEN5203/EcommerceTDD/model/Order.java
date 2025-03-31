@@ -22,7 +22,6 @@ public class Order {
     private Users user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<OrderItem> orderItems;
 
     @Column(name = "total_price", nullable = false)

@@ -42,10 +42,11 @@ class UserServiceTest {
         when(userRepo.findByEmail(logindto.getEmail())).thenReturn(user); // Mocking the findByEmail method
 
         // Act: Calling the method to be tested
-        String result = userService.login(logindto);
+        Users result = userService.login(logindto);
 
         // Assert: Verifying the result
-        assertEquals("User login successfully", result);
+        assertEquals(user.getEmail(), result.getEmail());
+        assertEquals(user.getPassword(), result.getPassword());
     }
 
     @Test
@@ -166,7 +167,7 @@ class UserServiceTest {
         // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
                 userService.updateRoles(roledetailsDTO));
-        assertEquals("Enter valid details", exception.getMessage());
+        assertEquals("Not Authorised", exception.getMessage());
     }
 
     @Test
@@ -206,7 +207,7 @@ class UserServiceTest {
         user.setEmail("delete@user.com");
 
         // Act
-        userRepo.delete(user); // Directly calling the delete method of the mocked repo.
+        userRepo.delete(user);
     }
 
     @Test
@@ -220,7 +221,7 @@ class UserServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             userService.deleteUsers("nonexistent@user.com", roledetailsDTO);
         });
-        assertEquals("User not present", exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
     }
     @Test
 

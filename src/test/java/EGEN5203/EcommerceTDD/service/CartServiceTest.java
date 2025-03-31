@@ -109,7 +109,7 @@ class CartServiceTest {
     @Test
     void addItemsToCart_InvalidParameters() {
         //Arrange
-       // when(userRepo.findById(1L)).thenReturn(Optional.ofNullable(users));
+       when(userRepo.findById(1L)).thenReturn(Optional.ofNullable(users));
         //Act
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             cartService.addItemsToCart(1L, null);
@@ -121,6 +121,8 @@ class CartServiceTest {
 //Testing product not found
 @Test
 void addItemsToCart_ProductNotFound() {
+        //Arrange
+    when(userRepo.findById(1L)).thenReturn(Optional.ofNullable(users));
         addToCartDto=new AddToCartDto();
         addToCartDto.setQuantity(2);
         addToCartDto.setProductName("damn");
@@ -133,6 +135,7 @@ void addItemsToCart_ProductNotFound() {
     @Test
     void addItemsToCart_InsufficientStock() {
         //Arrange
+        when(userRepo.findById(1L)).thenReturn(Optional.ofNullable(users));
         product.setQuantity(1); // Set stock to 1
         //Act
         when(productRepo.findByProductName("Xbox")).thenReturn(product);
@@ -297,12 +300,26 @@ void addItemsToCart_ProductNotFound() {
         //Act + arrange
         users.setRole(Roles.USER);
         when(userRepo.findById(1L)).thenReturn(Optional.of(users));
-
+        when(cartRepo.findById(1L)).thenReturn(Optional.of(cart));
         //Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             cartService.updateCartItems(1L,1L,updateCartDto);
         });
         assertEquals("Only admin can change these fields", exception.getMessage());
+    }
+    /**
+     * when user which does not exist tries to update cart
+     */
+    @Test
+    void user_not_existing_updates_caart(){
+        //Act + arrange
+        when(userRepo.findById(1L)).thenReturn(Optional.empty());
+//         when(cartRepo.findById(1L)).thenReturn(Optional.of(cart));
+        //Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            cartService.updateCartItems(1L,1L,updateCartDto);
+        });
+        assertEquals("User not found", exception.getMessage());
     }
     /**
      * When admin tries to update cart which doen't exist
@@ -318,5 +335,25 @@ void addItemsToCart_ProductNotFound() {
             cartService.updateCartItems(1L,1L,updateCartDto);
         });
         assertEquals("Cart not found", exception.getMessage());
+    }
+    @Test
+    void updateCartQuantity(){
+        when(cartRepo.findById(1L)).thenReturn(Optional.of(cart));
+//        when(cartRepo.save(any(Cart.class))).thenReturn(cart);
+        Cart updatedCart = cartService.updateCartQuantity(1L, 20);
+        assertNotNull(updatedCart);
+        assertEquals(20, updatedCart.getQuantity()); //Assert the result of the method.
+    }
+    //Testing updating cart quantity for which cart doesn't exists
+    @Test
+    void updateCartQuantity_cartNotFound() {
+        when(cartRepo.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> cartService.updateCartQuantity(1L, 20));
+    }
+    //Testing updating cart with null values
+    @Test
+    void updateCartQuantity_nullArguments(){
+        assertThrows(IllegalArgumentException.class, ()-> cartService.updateCartQuantity(null,20));
+        assertThrows(IllegalArgumentException.class, ()-> cartService.updateCartQuantity(1L,null));
     }
 }

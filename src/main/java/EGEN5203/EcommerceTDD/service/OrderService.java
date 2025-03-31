@@ -7,17 +7,14 @@ import EGEN5203.EcommerceTDD.enums.OrderStatus;
 import EGEN5203.EcommerceTDD.enums.PaymentStatus;
 import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.*;
-import EGEN5203.EcommerceTDD.repo.OrderRepo;
-import EGEN5203.EcommerceTDD.repo.PaymentRepo;
-import EGEN5203.EcommerceTDD.repo.ProductRepo;
-import EGEN5203.EcommerceTDD.repo.UserRepo;
+import EGEN5203.EcommerceTDD.repo.*;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -31,6 +28,8 @@ public class OrderService {
     private PaymentService paymentService;
 @Autowired
     private PaymentRepo paymentRepo;
+@Autowired
+    private OrderItemsrepo orderItemsrepo;
 @Transactional
 public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
     // Validate order items
@@ -125,7 +124,7 @@ public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
     }
 
     public List<Order> getAllOrders() {
-        return orderRepo.findAll();
+        return orderRepo.findAllOrdersWithItemsAndProducts();
     }
 
     public Order fetchOrdersById(Long id) {
@@ -155,5 +154,10 @@ public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
            return orderRepo.save(order);
         }
         throw new IllegalArgumentException("You are not authorised to update order status");
+    }
+
+    public List<Order> getUserOrdersById(Long userId) {
+        List<Order> orders=orderRepo.findOrdersByUserWithItemsAndProducts(userId);
+        return orders;
     }
 }

@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: EGEN5203.EcommerceTDD.EcommerceTddApplication
+

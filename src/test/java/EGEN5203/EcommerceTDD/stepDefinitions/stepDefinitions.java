@@ -70,7 +70,7 @@ public class stepDefinitions {
         logindto.setEmail(email);
         logindto.setPassword(password);
 
-        loginResult = userService.login(logindto);
+        user = userService.login(logindto);
     }
 
     @Then("The login should be successful")

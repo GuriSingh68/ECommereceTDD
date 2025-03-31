@@ -91,9 +91,6 @@ public class CartService {
         }
 @Transactional(readOnly = true)
     public String deleteCart(Long cartId,Long userId){
-        if (cartId==null || userId==null){
-            throw new IllegalArgumentException("Cart id cannot be null");
-        }
         cartRepo.findById(cartId).orElseThrow(() -> new IllegalArgumentException("Cart not found"));
        Users user= userRepo.findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -116,8 +113,7 @@ public class CartService {
 
     public Cart updateCartItems(Long cartId, Long userId, UpdateCartDto updateCartDto) {
         Users user=userRepo.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("User not found")
-        );
+                () -> new IllegalArgumentException("User not found"));
         Cart cart=cartRepo.findById(cartId).orElseThrow(
                 () -> new IllegalArgumentException("Cart not found")
         );
