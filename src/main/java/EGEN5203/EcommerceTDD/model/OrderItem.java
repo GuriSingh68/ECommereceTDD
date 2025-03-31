@@ -1,10 +1,13 @@
 package EGEN5203.EcommerceTDD.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString(exclude = {"order", "product"})
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
@@ -14,7 +17,7 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,4 +32,13 @@ public class OrderItem {
 
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
+
+    // If you want to add a derived user field
+    @Transient
+    private Users user;
+
+    // Method to get user from the associated order
+    public Users getUser() {
+        return this.order != null ? this.order.getUser() : null;
+    }
 }

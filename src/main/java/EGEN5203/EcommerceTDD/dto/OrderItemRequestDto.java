@@ -1,23 +1,15 @@
 package EGEN5203.EcommerceTDD.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
-/**
- * Data Transfer Object for product-related operations that require product ID and quantity.
- */
 @Data
-public class ProductDto {
+public class OrderItemRequestDto {
     @NotNull(message = "Product ID cannot be null")
     private Long productId;
 
     @NotNull(message = "Quantity cannot be null")
+    @Positive(message = "Quantity must be positive")
     private Integer quantity;
-
-    private String name;
-    private String description;
-    private Double price;
-    private String category;
-
-    private String farmer;
 }

@@ -8,7 +8,7 @@ const fetchCustomerOrders = async () => {
     try {
         const user = localStorage.getItem('user');
         const userId = JSON.parse(user!).user_id;
-        return await api(`/orders/customer-orders?customerId=${userId}`, {
+        return await api(`/orders/myOrders?userId=${userId}`, {
             method: 'GET',
         });
     } catch (error) {

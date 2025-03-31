@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * Maps to the "Product" table in the database and contains product details.
  */
 @Entity
+@ToString(exclude = {"users"})
 @Table(name = "Product")
 @Data
 public class Product {

@@ -12,5 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface CartRepo extends JpaRepository<Cart,Long> {
+
+//    /**
+//     * Find a cart item by user and product
+//     * @return Optional containing the cart item if found, empty otherwise
+//     */
+//    @Modifying
+//    @Query("UPDATE Cart c SET c.quantity = :quantity, c.price = :price WHERE c.id = :id")
+//    void updateCartItemQuantityAndPrice(@Param("id") Long id, @Param("quantity") int quantity, @Param("price") double price);
 }
 

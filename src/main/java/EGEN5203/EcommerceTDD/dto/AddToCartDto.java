@@ -14,4 +14,3 @@ public class AddToCartDto {
     @NotNull(message = "Customer ID cannot be null")
     private Long customerId;
 }
-

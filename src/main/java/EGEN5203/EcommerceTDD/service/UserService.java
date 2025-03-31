@@ -19,12 +19,12 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
     public String userSignup(Signupdto signupdto){
-    if(userRepo.existsByEmail(signupdto.getEmail())){
-        return "{\"error\": \"Email already registered\"}";
-    }
-    if(signupdto.getEmail().isBlank()||signupdto.getFirstName().isBlank()||signupdto.getLastName().isBlank()||signupdto.getPassword().isBlank()||signupdto.getRole().isBlank()||signupdto.getPhoneNumber().isBlank()){
-        throw new IllegalArgumentException("Enter valid input");
-    }
+        if(userRepo.existsByEmail(signupdto.getEmail())){
+            return "{\"error\": \"Email already registered\"}";
+        }
+        if(signupdto.getEmail().isBlank()||signupdto.getFirstName().isBlank()||signupdto.getLastName().isBlank()||signupdto.getPassword().isBlank()||signupdto.getRole().isBlank()||signupdto.getPhoneNumber().isBlank()){
+            throw new IllegalArgumentException("Enter valid input");
+        }
         Users user=new Users();
         user.setEmail(signupdto.getEmail());
         user.setFirstName(signupdto.getFirstName());

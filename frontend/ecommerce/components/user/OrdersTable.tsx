@@ -3,11 +3,11 @@
 import React from 'react';
 
 interface Order {
-    id: string;
+    id: number; // Change to number if your backend returns a number
     totalPrice: number;
     status: string;
     paymentStatus: string;
-    estimatedDeliveryDate: string;
+    orderDate: string; // Use orderDate instead of estimatedDeliveryDate
     orderItems: {
         product: { name: string; price: number };
         quantity: number;
@@ -29,7 +29,7 @@ const OrdersTable: React.FC<{ orders: Order[] }> = ({ orders }) => {
                         <th className="px-4 py-2 text-left text-sm font-semibold">Total Price</th>
                         <th className="px-4 py-2 text-left text-sm font-semibold">Status</th>
                         <th className="px-4 py-2 text-left text-sm font-semibold">Payment Status</th>
-                        <th className="px-4 py-2 text-left text-sm font-semibold">Delivery Date</th>
+                        <th className="px-4 py-2 text-left text-sm font-semibold">Order Date</th>
                         <th className="px-4 py-2 text-left text-sm font-semibold">Products</th>
                     </tr>
                     </thead>
@@ -56,9 +56,7 @@ const OrdersTable: React.FC<{ orders: Order[] }> = ({ orders }) => {
                                 {order.paymentStatus}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-700">
-                                {order.estimatedDeliveryDate
-                                    ? new Date(order.estimatedDeliveryDate).toLocaleDateString()
-                                    : "N/A"}
+                                {new Date(order.orderDate).toLocaleDateString()}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-600">
                                 <ul className="list-disc pl-5">

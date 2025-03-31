@@ -1,15 +1,18 @@
 package EGEN5203.EcommerceTDD.model;
 
 import EGEN5203.EcommerceTDD.enums.OrderStatus;
-import EGEN5203.EcommerceTDD.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@ToString(exclude = {"user", "orderItems"})
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -33,12 +36,4 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     private OrderStatus status;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status")
-    private PaymentStatus paymentStatus;
-
-    @Column(name = "transaction_id")
-    private String transactionId;
 }
-

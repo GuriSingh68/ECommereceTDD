@@ -25,50 +25,52 @@ export default function MyCart() {
     {value: "paypal", label:"Pay Pal"}
   ]
 
-  const handlePlaceOrder = async () => {
-    setIsLoading(true);
-    setError(null);
+    const handlePlaceOrder = async () => {
+        setIsLoading(true);
+        setError(null);
 
-    const orderData = {
-        totalPrice,
-        estimatedDeliveryDate: new Date(new Date().setDate(new Date().getDate() + 5)), // Ensure this is a Date object
-        paymentMethod,
-        products: cart.map(({ product, quantity }) => ({
+        // Ensure that the orderData includes orderItems
+        const orderItems = cart.map(({ product, quantity }) => ({
             productId: product.productId,
             quantity,
-            admin: product.users ? product.users.user_id : null
-        })),
-        status: 'pending',
-        paymentStatus: paymentMethod === 'cashondelivery' ? 'pending' : 'completed',
+        }));
+
+        const orderData = {
+            totalPrice,
+            estimatedDeliveryDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+            paymentMethod,
+            orderItems, // Use orderItems instead of products
+            status: 'pending',
+            paymentStatus: paymentMethod === 'cashondelivery' ? 'pending' : 'completed',
+        };
+
+        const user = localStorage.getItem("user");
+        const parsedUser  = JSON.parse(user!);
+        const userId = parsedUser .user_id;
+
+        try {
+            const createdOrder = await api(`/orders/create?userId=${userId}`, {
+                method: 'POST',
+                body: orderData,
+            });
+
+            toast.success('Your Order has been placed!', {
+                style: {
+                    borderRadius: '8px',
+                    background: '#16a34a',
+                    color: '#fff',
+                },
+            });
+            clearCart();
+            setIsDialogOpen(false);
+            router.push('/myorder');
+        } catch (err: any) {
+            console.error('Error placing order:', err);
+            setError(err.message || 'Failed to place order. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
-
-    const user = localStorage.getItem("user");
-    const parsedUser = JSON.parse(user!);
-    const userId = parsedUser.user_id;
-
-    try {
-        const createdOrder = await api(`/orders/create?userId=${userId}`, {
-            method: 'POST',
-            body: orderData,
-        });
-
-        toast.success('Your Order has been placed!', {
-            style: {
-                borderRadius: '8px',
-                background: '#16a34a',
-                color: '#fff',
-            },
-        });
-        clearCart();
-        setIsDialogOpen(false);
-        router.push('/myorder');
-    } catch (err: any) {
-        console.error('Error placing order:', err);
-        setError(err.message || 'Failed to place order. Please try again.');
-    } finally {
-        setIsLoading(false);
-    }
-};
 
   return (
     <div className="p-6 bg-gray-50 shadow-xl rounded-lg max-w-3xl mx-auto mt-24">
