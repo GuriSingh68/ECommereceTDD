@@ -29,7 +29,11 @@ public class PaymentService {
         payment.setOrder(order);
         payment.setAmount(order.getTotalPrice());
         payment.setPaymentDate(LocalDateTime.now());
-
+        payment.setPaymentMethod(String.valueOf(CarDType.CREDIT_CARD));
+        if(payment.getPaymentMethod().equals(CarDType.CASH_ON_DELIEVERY)){
+            payment.setStatus(PaymentStatus.PENDING);
+            return paymentRepo.save(payment);
+        }
         // Always set status to SUCCESS as per requirement
         payment.setStatus(PaymentStatus.SUCCESS);
 
@@ -63,10 +67,10 @@ public class PaymentService {
     }
     public Payments updatePaymentStatus(Integer paymentId, Long userId, UpdatePaymentStatusDto status) {
         Users users = getUsers(userId);
-        Payments payments=getPayments(paymentId);
-        if (isAdmin(users)){
+        Payments payments = getPayments(paymentId);
+        if (isAdmin(users)) {
             payments.setStatus(status.getPaymentStatus());
-            paymentRepo.save(payments);
+            return paymentRepo.save(payments);
         }
         throw new IllegalArgumentException("Cannot update payment status...User needs admin role");
     }
