@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class PaymentService {
@@ -29,14 +31,23 @@ public class PaymentService {
         }
 
         System.out.println("Processing payment for Order ID: " + order.getId());
-
+        RandomFourDigit randomFourDigit=new RandomFourDigit();
         Payments payment = new Payments();
         payment.setOrder(order);
         payment.setAmount(order.getTotalPrice());
+        payment.setPaymentMethod(String.valueOf(CarDType.CREDIT_CARD));
+        payment.setCardLastFour(String.valueOf(randomFourDigit));
         payment.setPaymentDate(LocalDateTime.now());
         payment.setStatus(PaymentStatus.SUCCESS);
 
         return paymentRepo.save(payment);
+    }
+    public class RandomFourDigit {
+        public static void main(String[] args) {
+            Random random = new Random();
+            int randomNumber = 1000 + random.nextInt(9000); // Generates a number between 1000 and 9999
+            System.out.println("Random 4-digit number: " + randomNumber);
+        }
     }
     // Additional method to simulate card processing
     public Payments processCardPayment(String cardNumber, String cvv, Double amount) {

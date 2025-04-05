@@ -20,6 +20,8 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payments payments;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

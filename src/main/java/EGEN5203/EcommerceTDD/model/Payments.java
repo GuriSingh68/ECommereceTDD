@@ -1,6 +1,7 @@
 package EGEN5203.EcommerceTDD.model;
 
 import EGEN5203.EcommerceTDD.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore
     private Order order;
 
     @Column(name = "payment_method")
