@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,50 +34,123 @@ public class OrderService {
     private PaymentService paymentService;
 @Autowired
     private PaymentRepo paymentRepo;
+
     @Transactional
     public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
-        validateOrderItems(createOrderDto.getOrderItems());
+        try {
+            validateOrderItems(createOrderDto.getOrderItems());
 
-        Users user = userRepo.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            Users user = userRepo.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Order order = new Order();
-        order.setUser(user);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(OrderStatus.PENDING);
+            validateStockAvailability(createOrderDto.getOrderItems());
 
-        List<OrderItem> orderItems = createOrderDto.getOrderItems().stream().map(
-                orderItemRequest -> {
-                    Product product = productRepo.findById(orderItemRequest.getProductId())
-                            .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            Order order = new Order();
+            order.setUser(user);
+            order.setOrderDate(LocalDateTime.now());
+            order.setStatus(OrderStatus.PENDING);
 
-                    OrderItem orderItem = new OrderItem();
-                    orderItem.setProduct(product);
-                    orderItem.setQuantity(orderItemRequest.getQuantity());
-                    orderItem.setItemPrice(product.getPrice());
-                    orderItem.setTotalPrice(product.getPrice() * orderItemRequest.getQuantity());
-                    orderItem.setOrder(order);
-                    return orderItem;
+            int randomDays = 3 + new Random().nextInt(5); // Random between 3-7 days
+            order.setEstimatedDeliveryDate(LocalDateTime.now().plusDays(randomDays));
+
+            List<OrderItem> orderItems = new ArrayList<>();
+            for (OrderItemRequestDto itemDto : createOrderDto.getOrderItems()) {
+                Product product = productRepo.findById(itemDto.getProductId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Product not found with ID: " + itemDto.getProductId()));
+
+                product.setStock(product.getStock() - itemDto.getQuantity());
+                productRepo.save(product);
+
+                OrderItem orderItem = new OrderItem();
+                orderItem.setProduct(product);
+                orderItem.setQuantity(itemDto.getQuantity());
+                orderItem.setItemPrice(product.getPrice());
+                orderItem.setTotalPrice(product.getPrice() * itemDto.getQuantity());
+                orderItem.setOrder(order);
+                orderItems.add(orderItem);
+            }
+
+            order.setOrderItems(orderItems);
+            order.setTotalPrice(calculateTotalPrice(orderItems));
+
+            Order savedOrder = orderRepo.save(order);
+
+            // Process payment and set the bidirectional relationship
+            Payments payment = paymentService.processPayment(savedOrder, createOrderDto.getPaymentMethod(), createOrderDto.getPaymentStatus());
+            payment.setOrder(savedOrder);  // Set the order reference in payment
+            System.out.println(payment);
+            savedOrder.setPayments(payment);  // Set the payment reference in order
+
+            if (payment.getStatus() == PaymentStatus.COMPLETED) {
+                savedOrder.setStatus(OrderStatus.COMPLETED);
+                return orderRepo.save(savedOrder);
+            } else if (payment.getStatus() == PaymentStatus.PENDING && payment.getPaymentMethod().equals("cashondelivery")) {
+                savedOrder.setStatus(OrderStatus.COMPLETED);
+                return orderRepo.save(savedOrder);
+            } else {
+                restoreProductStock(savedOrder);
+                savedOrder.setStatus(OrderStatus.CANCELLED);
+                orderRepo.save(savedOrder);
+                throw new PaymentException("Payment processing failed. Order cancelled and stock restored.");
+            }
+        } catch (Exception e) {
+            System.err.println("Order creation failed: " + e);
+            e.printStackTrace();
+            throw new IllegalArgumentException("Order creation failed: " +
+                    (e.getMessage() != null ? e.getMessage() : "Please check your order details and try again"));
+        }
+    }
+    private List<OrderItem> processOrderItems(List<OrderItemRequestDto> orderItems, Order order) {
+        return orderItems.stream().map(item -> {
+            Product product = productRepo.findById(item.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Product not found with ID: " + item.getProductId()));
+
+            // Deduct stock
+            product.setStock(product.getStock() - item.getQuantity());
+            productRepo.save(product);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(product);
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setItemPrice(product.getPrice());
+            orderItem.setTotalPrice(product.getPrice() * item.getQuantity());
+            orderItem.setOrder(order);
+            return orderItem;
+        }).toList();
+    }
+
+    private void validateStockAvailability(List<OrderItemRequestDto> orderItems) {
+        for (OrderItemRequestDto item : orderItems) {
+            Product product = productRepo.findById(item.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Product not found with ID: " + item.getProductId()));
+
+            if (product.getStock() < item.getQuantity()) {
+                throw new IllegalArgumentException(
+                        String.format("Insufficient stock for product %s (ID: %d). Available: %d, Requested: %d",
+                                product.getName(), product.getProductId(), product.getStock(), item.getQuantity()));
+            }
+        }
+    }
+
+    private void restoreProductStock(Order order) {
+        if (order.getOrderItems() != null) {
+            order.getOrderItems().forEach(item -> {
+                if (item.getProduct() != null) {
+                    Product product = item.getProduct();
+                    product.setStock(product.getStock() + item.getQuantity());
+                    productRepo.save(product);
                 }
-        ).toList();
+            });
+        }
+    }
 
-        Double totalPrice = orderItems.stream()
+    private Double calculateTotalPrice(List<OrderItem> orderItems) {
+        return orderItems.stream()
                 .mapToDouble(OrderItem::getTotalPrice)
                 .sum();
-
-        order.setTotalPrice(totalPrice);
-        order.setOrderItems(orderItems);
-
-        Order savedOrder = orderRepo.save(order);
-        Payments payment = paymentService.processPayment(savedOrder);
-
-        if (payment.getStatus().equals(PaymentStatus.SUCCESS)) {
-            order.setStatus(OrderStatus.COMPLETED);
-            return savedOrder;
-        }
-
-        order.setStatus(OrderStatus.CANCELLED);
-        throw new IllegalArgumentException("Checkout failed...retry again");
     }
 private void validateOrderItems(List<OrderItemRequestDto> orderItems) {
     if (orderItems == null || orderItems.isEmpty()) {
@@ -142,5 +217,11 @@ private void validateOrderItems(List<OrderItemRequestDto> orderItems) {
            return orderRepo.save(order);
         }
         throw new IllegalArgumentException("You are not authorised to update order status");
+    }
+}
+
+class PaymentException extends RuntimeException {
+    public PaymentException(String message) {
+        super(message);
     }
 }

@@ -49,10 +49,19 @@ import java.util.stream.Collectors;
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/admin/allOrders")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrdersForAdmin() {
+        List<Order> orders = orderService.getAllOrders();
+        List<OrderResponseDto> dtos = orders.stream()
+                .map(orderMapper::toOrderResponseDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
     @DeleteMapping("/deleteOrder")
     public ResponseEntity<String> deleteOrder(@RequestParam Long orderId){
         orderService.deleteOrder(orderId);
-        return ResponseEntity.status(HttpStatus.OK).body("Order deleted successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("{\"message\": \"Order Deleted Successfully\"}");
     }
     //Admin can update order status only
     @PatchMapping("/updateOrder")

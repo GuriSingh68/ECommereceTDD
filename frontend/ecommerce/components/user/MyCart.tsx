@@ -34,14 +34,15 @@ export default function MyCart() {
             productId: product.productId,
             quantity,
         }));
+    console.log(paymentMethod);
 
         const orderData = {
             totalPrice,
-            estimatedDeliveryDate: new Date(new Date().setDate(new Date().getDate() + 5)),
             paymentMethod,
-            orderItems, // Use orderItems instead of products
-            status: 'pending',
-            paymentStatus: paymentMethod === 'cashondelivery' ? 'pending' : 'completed',
+            paymentStatus: paymentMethod === 'cashondelivery' ? 'PENDING' : 'COMPLETED',
+            orderItems,
+            status: 'PENDING',
+
         };
 
         const user = localStorage.getItem("user");

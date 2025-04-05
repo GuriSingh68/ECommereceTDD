@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -24,8 +25,11 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<OrderItem> orderItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payments payments;
 
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
@@ -36,4 +40,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
     private OrderStatus status;
+
+    @Column(name = "estimated_delivery_date")
+    private LocalDateTime estimatedDeliveryDate;
 }

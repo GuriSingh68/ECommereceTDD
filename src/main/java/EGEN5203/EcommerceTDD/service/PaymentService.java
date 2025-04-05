@@ -23,17 +23,16 @@ public class PaymentService {
     @Autowired
         private UserRepo userRepo;
     @Transactional
-    public Payments processPayment(Order order) {
+    public Payments processPayment(Order order, String paymentMethod, PaymentStatus paymentStatus) {
         //Create a new Payment
         Payments payment=new Payments();
         payment.setOrder(order);
         payment.setAmount(order.getTotalPrice());
         payment.setPaymentDate(LocalDateTime.now());
+        payment.setPaymentMethod(paymentMethod);
 
-        // Always set status to SUCCESS as per requirement
-        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setStatus(paymentStatus);
 
-        // Save the payment record
         return paymentRepo.save(payment);
     }
     // Additional method to simulate card processing (if needed)
@@ -44,7 +43,7 @@ public class PaymentService {
         payment.setCardLastFour(cardNumber.substring(cardNumber.length() - 4));
         payment.setAmount(amount);
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setStatus(PaymentStatus.PENDING);
 
         return paymentRepo.save(payment);
     }

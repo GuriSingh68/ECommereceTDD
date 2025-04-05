@@ -1,9 +1,6 @@
 package EGEN5203.EcommerceTDD.dto;
 
-import EGEN5203.EcommerceTDD.model.Order;
-import EGEN5203.EcommerceTDD.model.OrderItem;
-import EGEN5203.EcommerceTDD.model.Product;
-import EGEN5203.EcommerceTDD.model.Users;
+import EGEN5203.EcommerceTDD.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -20,6 +17,10 @@ public class OrderMapper {
         dto.setTotalPrice(order.getTotalPrice());
         dto.setOrderDate(order.getOrderDate());
         dto.setStatus(order.getStatus());
+        dto.setEstimatedDeliveryDate(order.getEstimatedDeliveryDate());
+        if (order.getPayments() != null) {
+            dto.setPayment(toPaymentInfoDto(order.getPayments()));
+        }
         return dto;
     }
 
@@ -52,6 +53,17 @@ public class OrderMapper {
         dto.setPrice(product.getPrice());
         dto.setQuantity(product.getStock());
         dto.setCategory(product.getCategory());
+        return dto;
+    }
+
+    private PaymentInfoDto toPaymentInfoDto(Payments payment) {
+        PaymentInfoDto dto = new PaymentInfoDto();
+        dto.setId(payment.getId());
+        dto.setPaymentMethod(payment.getPaymentMethod());
+        dto.setCardLastFour(payment.getCardLastFour());
+        dto.setAmount(payment.getAmount());
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setStatus(payment.getStatus());
         return dto;
     }
 }

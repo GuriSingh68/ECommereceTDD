@@ -14,4 +14,6 @@ public class OrderResponseDto {
     private Double totalPrice;
     private LocalDateTime orderDate;
     private OrderStatus status;
+    private PaymentInfoDto payment;
+    private LocalDateTime estimatedDeliveryDate;
 }
