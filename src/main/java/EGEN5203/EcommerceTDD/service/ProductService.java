@@ -131,7 +131,7 @@ public class ProductService {
 
         // Delete the product by ID
         productRepo.deleteById(id);
-        return "{\"message\": \"Product deleted successfully!\"}";
+        return "Product deleted successfully!";
 
     }
 
@@ -141,7 +141,7 @@ public class ProductService {
      * @param addProductsDTO the data transfer object containing product details.
      * @throws IllegalArgumentException if validation fails.
      */
-    private void validateAddProductInput(AddProductsDto addProductsDTO) {
+    void validateAddProductInput(AddProductsDto addProductsDTO) {
         if (addProductsDTO.getName() == null || addProductsDTO.getName().isEmpty()) {
             throw new IllegalArgumentException("Product name cannot be null or empty");
         }

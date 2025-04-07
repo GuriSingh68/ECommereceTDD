@@ -87,7 +87,7 @@ class UserServiceTest {
 
         String result = userService.userSignup(signupdto);
 
-        assertEquals("{\"message\": \"User  signed up successfully!\"}", result);
+        assertEquals("{\"message\": \"User signed up successfully!\"}", result);
     }
 
     @Test

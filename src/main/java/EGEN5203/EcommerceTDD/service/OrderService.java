@@ -2,10 +2,13 @@ package EGEN5203.EcommerceTDD.service;
 
 import EGEN5203.EcommerceTDD.dto.CreateOrderDto;
 import EGEN5203.EcommerceTDD.dto.OrderItemsDto;
+import EGEN5203.EcommerceTDD.dto.UpdateOrdersDto;
 import EGEN5203.EcommerceTDD.enums.OrderStatus;
 import EGEN5203.EcommerceTDD.enums.PaymentStatus;
+import EGEN5203.EcommerceTDD.enums.Roles;
 import EGEN5203.EcommerceTDD.model.*;
 import EGEN5203.EcommerceTDD.repo.OrderRepo;
+import EGEN5203.EcommerceTDD.repo.PaymentRepo;
 import EGEN5203.EcommerceTDD.repo.ProductRepo;
 import EGEN5203.EcommerceTDD.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,8 @@ public class OrderService {
 
     @Autowired
     private OrderRepo orderRepo;
+    @Autowired
+        private PaymentRepo paymentRepo;
 
     @Transactional
     public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
@@ -107,5 +112,59 @@ public class OrderService {
 
     public List<Order> findOrdersByAdminId(Long adminId) {
         return orderRepo.findOrdersByAdminId(adminId);
+    }
+    public Order deleteOrder(Long orderId) {
+        paymentRepo.deleteById(Math.toIntExact(orderId));
+        Order order=orderRepo.findById((long) Math.toIntExact(orderId))
+                .orElseThrow(() -> new  IllegalArgumentException("Order not found"));
+
+        orderRepo.deleteById(orderId);
+        return order;
+    }
+    public List<Order> getUserOrders(Users user) {
+        return orderRepo.findByUser(user);
+    }
+    public Order getOrderDetails(Long orderId, Users user) {
+        return orderRepo.findByIdAndUser(orderId, user);
+    }
+    @Transactional
+    public Order cancelOrder(Long orderId, Users user) {
+        Order order = getOrderDetails(orderId, user);
+
+        // Only allow cancellation of pending orders
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalArgumentException("Cannot cancel processed order");
+        }
+
+        // Restore product inventory
+        order.getOrderItems().forEach(item -> {
+            Product product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepo.save(product);
+        });
+
+        order.setStatus(OrderStatus.CANCELLED);
+        return orderRepo.save(order);
+    }
+    public Order updateOrderStatus(Integer userId, UpdateOrdersDto orderStatus) {
+        Users user=userRepo.findById(Long.valueOf(userId)).
+                orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (user.getRole().equals(Roles.ADMIN)){
+            Order order=orderRepo.findById(Long.valueOf(orderStatus.getOrderId()))
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+            order.setStatus(orderStatus.getStatus());
+            return orderRepo.save(order);
+        }
+        throw new IllegalArgumentException("You are not authorised to update order status");
+    }
+    public List<Order> getAllOrders() {
+        return orderRepo.findAllOrdersWithItemsAndProducts();
+    }
+    public Order fetchOrdersById(Long id) {
+        Order order=orderRepo.findById(id)
+                .orElseThrow(() ->
+                        new  IllegalArgumentException("Order not found")
+                );
+        return order;
     }
 }

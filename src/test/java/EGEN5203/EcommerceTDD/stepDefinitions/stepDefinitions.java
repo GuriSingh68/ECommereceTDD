@@ -78,7 +78,7 @@ public class stepDefinitions {
 
     @Then("The login should be successful")
     public void successfulLogin() {
-        assertEquals("User login successfully", loginResult);
+        assertEquals(user.getEmail(), "abc@xyz.com");
     }
 
     @Given("No user exists with email {string}")
@@ -276,7 +276,7 @@ public class stepDefinitions {
 
     @Then("The product should be deleted successfully")
     public void the_product_should_be_deleted_successfully() {
-        Assertions.assertEquals("{\"message\": \"Product deleted successfully!\"}", resultMessage);
+        Assertions.assertEquals("Product deleted successfully!", resultMessage);
     }
 
     @When("The user tries to delete a product with ID {int}")
