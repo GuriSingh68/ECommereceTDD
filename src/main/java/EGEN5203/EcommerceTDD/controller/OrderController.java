@@ -14,21 +14,40 @@ import java.util.List;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
+    /**
+     * Order service containing logic of all the orders
+     */
     @Autowired
     private OrderService orderService;
 
+    /**
+     * Create order endpoint
+     * @param createOrderDto
+     * @param userId
+     * @return
+     */
     @PostMapping("/create")
     public ResponseEntity<Order> createOrder(@RequestBody CreateOrderDto createOrderDto, @RequestParam Long userId) {
         Order createdOrder = orderService.createOrder(createOrderDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
+    /**
+     * This end point returns all the orders by Admin only
+     * @param adminId
+     * @return
+     */
     @GetMapping("/admin-orders")
     public ResponseEntity<List<Order>> getOrdersByAdmin(@RequestParam Long adminId) {
         List<Order> orders = orderService.findOrdersByAdminId(adminId);
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * Returns all the customer orders
+     * @param customerId
+     * @return
+     */
     @GetMapping("/customer-orders")
     public ResponseEntity<List<Order>> getCustomerOrders(@RequestParam Long customerId) {
         List<Order> orders = orderService.findOrdersByCustomerId(customerId);

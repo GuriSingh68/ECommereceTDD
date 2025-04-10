@@ -1,0 +1,75 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam classAttributeIconSize 0
+
+' Controller Layer
+class CartController {
+  +create(AddToCartDto): Cart
+  +findAll(): List<Cart>
+  +findOne(id: Long): Cart
+  +update(id: Long, UpdateCartDto): Cart
+  +remove(id: Long): void
+}
+
+' Service Layer
+class CartService {
+  +createCart(AddToCartDto): Cart
+  +findAll(): List<Cart>
+  +findOne(id: Long): Cart
+  +updateCart(id: Long, UpdateCartDto): Cart
+  +deleteCart(id: Long): void
+}
+
+' DTOs
+class AddToCartDto {
+  -customerId: Long
+  -products: List<ProductQuantityDto>
+}
+
+class UpdateCartDto {
+  -customerId: Long
+  -products: List<ProductQuantityDto>
+}
+
+class ProductQuantityDto {
+  -productId: Long
+  -quantity: int
+}
+
+' Entities
+class Cart {
+  -id: Long
+  -customer: Users
+  -items: List<CartItem>
+}
+
+class CartItem {
+  -id: Long
+  -cart: Cart
+  -product: Product
+  -quantity: int
+}
+
+class Product {
+  -productId: Long
+  -name: String
+  -price: Double
+}
+
+class Users {
+  -userId: Long
+  -firstName: String
+  -email: String
+}
+
+' Relationships
+CartController --> CartService
+CartService --> AddToCartDto
+CartService --> UpdateCartDto
+AddToCartDto --> ProductQuantityDto
+UpdateCartDto --> ProductQuantityDto
+Cart --> Users
+Cart --> CartItem
+CartItem --> Product
+
+@enduml

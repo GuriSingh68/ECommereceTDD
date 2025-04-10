@@ -1,0 +1,48 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam classAttributeIconSize 0
+
+' Service Layer
+class PaymentService {
+  +processPayment(order: Order): Payments
+  +processCardPayment(cardNumber: String, cvv: String, amount: Double): Payments
+  +fetchAllDetails(): List<Payments>
+  +getPaymentsById(paymentId: Integer, userId: Long): Payments
+  +updatePaymentStatus(paymentId: Integer, userId: Long, status: UpdatePaymentStatusDto): Payments
+}
+
+' DTO
+class UpdatePaymentStatusDto {
+  -paymentStatus: String
+}
+
+' Entities
+class Payments {
+  -id: Integer
+  -amount: Double
+  -paymentMethod: String
+  -cardLastFour: String
+  -paymentDate: LocalDateTime
+  -status: String
+  -order: Order
+}
+
+class Order {
+  -id: Long
+  -totalPrice: Double
+}
+
+class Users {
+  -userId: Long
+  -role: String
+  -email: String
+}
+
+' Relationships
+PaymentService --> Payments
+PaymentService --> Order
+PaymentService --> Users
+PaymentService --> UpdatePaymentStatusDto
+Payments --> Order
+
+@enduml

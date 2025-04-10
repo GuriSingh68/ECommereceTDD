@@ -24,21 +24,43 @@ import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-
+/**
+ * Test cases for orders
+ */
 @ExtendWith(MockitoExtension.class) class OrderServiceTest {
+    /**
+     * Mocking user repo
+     */
     @Mock
     private UserRepo userRepo;
+    /**
+     * Mocking product repo
+     */
     @Mock
     private ProductRepo productRepo;
+    /**
+     * Mocking Order repo
+     */
     @Mock
     private OrderRepo orderRepo;
-    @Mock
+    /**
+     * Mocking Payment service
+     */
+    @InjectMocks
     private PaymentService paymentService;
+    /**
+     * Mocking payment repo
+     */
     @Mock
     private PaymentRepo paymentRepo;
+    /**
+     * Mocking Order items repo
+     */
     @Mock
     private OrderItemsrepo orderItemsrepo;
-
+    /**
+     * Mocking order service
+     */
     @InjectMocks
     private OrderService orderService;
 
@@ -50,6 +72,10 @@ import static org.junit.jupiter.api.Assertions.*;
     private OrderItemsDto orderItemsDto;
     private Payments payment;
     private UpdateOrdersDto updateOrdersDto;
+
+    /**
+     * setting up dto and models before each test case
+     */
     @BeforeEach()
     void setUp() {
         user = new Users();
@@ -106,6 +132,23 @@ import static org.junit.jupiter.api.Assertions.*;
         assertNotNull(createdOrder);
         assertEquals(OrderStatus.PENDING, createdOrder.getStatus());
         assertEquals(10, product.getStock());
+    }
+
+    /**
+     * Testing catching exception of insufficient stock
+     */
+    @Test
+    void createOrderInsufficientStockException() {
+        //Ararnge + Act
+        when(userRepo.findById(1L)).thenReturn(Optional.of(user));
+        when(productRepo.findByProductId(1L)).thenReturn(product);
+        product.setStock(1);
+//        when(orderRepo.save(any(Order.class))).thenReturn(order);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            orderService.createOrder(createOrderDto, 1L);
+        });
+
+        assertEquals("Insufficient stock for product: null", exception.getMessage());
     }
     //Test creating and order for which user does not exist
     @Test
@@ -256,6 +299,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
     }
 
+    /**
+     * testing catching exception for id not found
+     */
     @Test
     void findOrdersByCustomerId_userNotFound_throwsException() {
         // Arrange
@@ -269,6 +315,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
     }
 
+    /**
+     * Testing order returning an empty list
+     */
     @Test
     void findOrdersByCustomerId_userFound_noOrders_returnsEmptyList() {
         // Arrange
@@ -284,6 +333,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
     }
 
+    /**
+     * Testing admin user not found
+     */
     @Test
     void findOrdersByAdminId_adminFound_returnsOrders() {
         // Arrange
@@ -300,6 +352,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
     }
 
+    /**
+     * Testing id not found
+     */
     @Test
     void findOrdersByAdminId_adminFound_noOrders_returnsEmptyList() {
         // Arrange
@@ -313,4 +368,113 @@ import static org.junit.jupiter.api.Assertions.*;
         assertTrue(foundOrders.isEmpty());
 
     }
+
+    /**
+     * Testing returning an exception for throwing null order items
+     */
+    @Test
+    void shouldThrowExceptionWhenOrderItemsIsNull() {
+        
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(null));
+    }
+
+    /**
+     * Testing throwing when order items is empty
+     */
+    @Test
+    void shouldThrowExceptionWhenOrderItemsIsEmpty() {
+        // Not Covered Line: if (orderItems.isEmpty())
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(new ArrayList<>()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenProductIdIsNull() {
+        // Test case: Product ID is null
+        // Expected: IllegalArgumentException
+        // Line covered: if (item.getProductId() == null)
+        OrderItemsDto item = new OrderItemsDto();
+        item.setQuantity(1);
+        item.setAdmin("admin123");
+        List<OrderItemsDto> items = List.of(item);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(items));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenQuantityIsNull() {
+        // Test case: Quantity is null
+        // Expected: IllegalArgumentException
+        // Line covered: if (item.getQuantity() == null)
+        OrderItemsDto item = new OrderItemsDto();
+        item.setProductId(10L);
+        item.setAdmin("admin123");
+        List<OrderItemsDto> items = List.of(item);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(items));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenQuantityIsZero() {
+        // Test case: Quantity is zero
+        // Expected: IllegalArgumentException
+        // Line covered: if (item.getQuantity() <= 0)
+        OrderItemsDto item = new OrderItemsDto();
+        item.setProductId(10L);
+        item.setQuantity(0);
+        item.setAdmin("admin123");
+        List<OrderItemsDto> items = List.of(item);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(items));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAdminIsNull() {
+        // Test case: Admin is null
+        // Expected: IllegalArgumentException
+        // Line covered: if (item.getAdmin() == null)
+        OrderItemsDto item = new OrderItemsDto();
+        item.setProductId(10L);
+        item.setQuantity(1);
+        item.setAdmin(null);
+        List<OrderItemsDto> items = List.of(item);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(items));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAdminIsEmpty() {
+        // Test case: Admin is an empty string
+        // Expected: IllegalArgumentException
+        // Line covered: if (item.getAdmin().isEmpty())
+        OrderItemsDto item = new OrderItemsDto();
+        item.setProductId(10L);
+        item.setQuantity(1);
+        item.setAdmin("");
+        List<OrderItemsDto> items = List.of(item);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.validateOrderItems(items));
+    }
+
+    @Test
+    void shouldPassForValidOrderItem() {
+        // Happy path: All fields are valid
+        // Expected: No exception thrown
+        // All lines in validateOrderItems method are covered
+        OrderItemsDto item = new OrderItemsDto();
+        item.setProductId(10L);
+        item.setQuantity(2);
+        item.setAdmin("admin123");
+        List<OrderItemsDto> items = List.of(item);
+
+        assertDoesNotThrow(() ->
+                orderService.validateOrderItems(items));
+    }
+
 }

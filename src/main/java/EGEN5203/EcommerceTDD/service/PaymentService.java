@@ -26,9 +26,7 @@ public class PaymentService {
     private UserRepo userRepo;
     @Transactional
     public Payments processPayment(Order order) {
-        if (order == null) {
-            throw new NullPointerException("Received a null order in processPayment!");
-        }
+        //if (order == null)  {throw new NullPointerException("Received a null order in processPayment!");}
 
         System.out.println("Processing payment for Order ID: " + order.getId());
         Payments payment = new Payments();
@@ -65,6 +63,12 @@ public class PaymentService {
         return paymentRepo.findAll();
     }
 
+    /**
+     * Method to get Payment Details By Id for any user
+     * @param paymentId
+     * @param userId
+     * @return
+     */
     public Payments getPaymentsById(Integer paymentId,Long userId) {
         Users users = getUsers(userId);
 
@@ -73,23 +77,27 @@ public class PaymentService {
         }
         throw new IllegalArgumentException("Only admin access");
     }
+    private static boolean isAdmin(Roles users) {
+        return users.equals(Roles.ADMIN);
+    }
+    private Users getUsers(Long userId) {
+        Users users=userRepo.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("User not found")
+        );
+        return users;
+    }
     public Payments updatePaymentStatus(Integer paymentId, Long userId, UpdatePaymentStatusDto status) {
         Users users=userRepo.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("User not found")
         );
         Payments payments=paymentRepo.findById(paymentId).orElseThrow(
                 () -> new IllegalArgumentException("Payment not found")
-        );
-        if (Roles.ADMIN.equals(users.getRole())){
+        );if (Roles.ADMIN.equals(users.getRole())){
             payments.setStatus(status.getPaymentStatus());
             return paymentRepo.save(payments);
-        }
-        throw new IllegalArgumentException("Error occured while update");
-    }
+        } throw new IllegalArgumentException("Error occurred while update");}
 
-    private static boolean isAdmin(Roles users) {
-        return users.equals(Roles.ADMIN);
-    }
+
 
     private Payments getPayments(Integer paymentId) {
         return paymentRepo.findById(paymentId).orElseThrow(
@@ -97,11 +105,6 @@ public class PaymentService {
         );
     }
 
-    private Users getUsers(Long userId) {
-        Users users=userRepo.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("User not found")
-        );
-        return users;
-    }
+
 
 }

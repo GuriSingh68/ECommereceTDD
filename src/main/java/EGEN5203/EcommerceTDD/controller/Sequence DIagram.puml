@@ -1,0 +1,47 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+' ==== Packages ====
+package "Controller Layer" {
+  [UserController]
+}
+
+package "Service Layer" {
+  [UserService]
+  [UserServiceImpl]
+}
+
+package "DTOs" {
+  [SignupDTO]
+  [LoginDTO]
+  [RoledetailsDTO]
+}
+
+package "Entity Layer" {
+  [Users]
+  [Roles]
+}
+
+package "Repository Layer" {
+  [UserRepository]
+}
+
+package "Database" {
+  [USERS Table]
+}
+
+' ==== Relationships ====
+[UserController] --> [UserService] : calls
+[UserServiceImpl] --> [UserRepository] : accesses
+
+[UserServiceImpl] --> [SignupDTO]
+[UserServiceImpl] --> [LoginDTO]
+[UserServiceImpl] --> [RoledetailsDTO]
+
+[UserRepository] --> [Users]
+[Users] --> [Roles]
+
+[UserRepository] --> [USERS Table]
+
+@enduml

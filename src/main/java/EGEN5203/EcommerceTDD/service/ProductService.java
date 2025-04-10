@@ -38,9 +38,7 @@ public class ProductService {
 
         // Find user by email
         Users user = userRepo.findByEmail(username);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found");
-        }
+        extracted(user);
 
         // Check if the user has admin role
         if (!user.getRole().equals(Roles.ADMIN)) {
@@ -67,6 +65,12 @@ public class ProductService {
         return "{\"message\": \"Product added successfully!\"}";
     }
 
+    private static void extracted(Users user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+    }
+
     /**
      * Updates an existing product's details.
      *
@@ -82,9 +86,7 @@ public class ProductService {
 
         // Find user by email
         Users user = userRepo.findByEmail(username);
-        if (user == null) {
-            throw new IllegalArgumentException("User  not found");
-        }
+        extracted(user);
 
         // Check if the user has admin role
         if (!user.getRole().equals(Roles.ADMIN)) {
@@ -116,10 +118,7 @@ public class ProductService {
     public String deleteProduct(Long id, String username) {
         // Find user by email
         Users user = userRepo.findByEmail(username);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found");
-        }
-
+        extracted(user);
         // Check if the user has admin role
         if (!user.getRole().equals(Roles.ADMIN)) {
             throw new IllegalArgumentException("Only admin can delete products");

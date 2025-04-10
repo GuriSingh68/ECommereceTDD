@@ -11,5 +11,4 @@ import org.junit.runner.RunWith;
         glue = "EGEN5203.EcommerceTDD.stepDefinitions"                   // Location of step definition classes
 )
 public class testRunners {
-
 }

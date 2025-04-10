@@ -1,0 +1,29 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+package "Controller Layer" {
+  [UserController]
+  [ProductController]
+  [OrderController]
+}
+
+package "Service Layer" {
+  [UserService]
+  [ProductService]
+  [OrderService]
+
+}
+package "Entity Layer" {
+  [Users]
+  [Product]
+  [Order]
+}
+
+[UserController] --> [UserService]
+[UserService] --> [Users]
+[ProductController] --> [ProductService]
+[ProductService]  --> [Product]
+[OrderController] --> [OrderService]
+[OrderService] --> [Order]
+@enduml

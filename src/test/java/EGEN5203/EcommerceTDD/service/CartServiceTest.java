@@ -23,19 +23,29 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
-
+    /**
+     * Injecting  service
+     */
     @InjectMocks
     private CartService cartService;
-
+    /**
+     * Mocking repo
+     */
     @Mock
     private CartRepo cartRepo;
-
+    /**
+     * Mocking repo
+     */
     @Mock
     private CartItemRepo cartItemRepo;
-
+    /**
+     * Mocking repo
+     */
     @Mock
     private ProductRepo productRepo;
-
+    /**
+     * Mocking repo
+     */
     @Mock
     private UserRepo userRepo;
 
@@ -89,6 +99,9 @@ class CartServiceTest {
         updateCartDto.setProducts(Collections.singletonList(updateProductDto));
     }
 
+    /**
+     * Testing sucessfully creating user
+     */
     @Test
     void createCart_Success() {
         when(userRepo.findById(1L)).thenReturn(Optional.of(customer));
@@ -105,6 +118,9 @@ class CartServiceTest {
         verify(cartRepo, times(1)).save(any(Cart.class));
     }
 
+    /**
+     * Testing customer not found throwing an exception
+     */
     @Test
     void createCart_CustomerNotFound() {
         when(userRepo.findById(1L)).thenReturn(Optional.empty());
@@ -116,6 +132,9 @@ class CartServiceTest {
         assertEquals("Customer not found", exception.getMessage());
     }
 
+    /**
+     * Testing product not found throwing an exception
+     */
     @Test
     void createCart_ProductNotFound() {
         when(userRepo.findById(1L)).thenReturn(Optional.of(customer));
@@ -128,6 +147,9 @@ class CartServiceTest {
         assertEquals("Product not found", exception.getMessage());
     }
 
+    /**
+     * Testing finding all products in a cart
+     */
     @Test
     void findAll_Success() {
         when(cartRepo.findAll()).thenReturn(Collections.singletonList(cart));
@@ -137,7 +159,9 @@ class CartServiceTest {
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
     }
-
+    /**
+     * Testing finding one products in a cart
+     */
     @Test
     void findOne_Success() {
         when(cartRepo.findById(1L)).thenReturn(Optional.of(cart));
@@ -147,7 +171,9 @@ class CartServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
     }
-
+    /**
+     * Testing not finding one products in a cart
+     */
     @Test
     void findOne_NotFound() {
         when(cartRepo.findById(1L)).thenReturn(Optional.empty());
@@ -158,7 +184,9 @@ class CartServiceTest {
 
         assertEquals("Cart not found", exception.getMessage());
     }
-
+    /**
+     * Testing updating  products in a cart
+     */
     @Test
     void updateCart_Success() {
         when(cartRepo.findById(1L)).thenReturn(Optional.of(cart));
@@ -171,7 +199,9 @@ class CartServiceTest {
         assertNotNull(result);
         verify(cartItemRepo, times(1)).deleteByCartId(1L);
     }
-
+    /**
+     * Testing updating  products in a cart for which cart doesn't exist
+     */
     @Test
     void updateCart_CartNotFound() {
         when(cartRepo.findById(1L)).thenReturn(Optional.empty());
@@ -182,7 +212,9 @@ class CartServiceTest {
 
         assertEquals("Cart not found", exception.getMessage());
     }
-
+    /**
+     * Testing updating  products in a cart for which new product doesn't exist
+     */
     @Test
     void updateCart_ProductNotFound() {
         Cart cart = new Cart();
@@ -199,7 +231,9 @@ class CartServiceTest {
 
         assertEquals("Product not found", exception.getMessage());
     }
-
+    /**
+     * Testing deleting a cart
+     */
     @Test
     void deleteCart_Success() {
         lenient().when(cartRepo.existsById(1L)).thenReturn(true);

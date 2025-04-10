@@ -16,8 +16,18 @@ import javax.naming.AuthenticationException;
 
 @Service
 public class UserService {
+    /**
+     * User repository to connect with database
+     */
     @Autowired
     private UserRepo userRepo;
+
+    /**
+     * Logic for signing up a new user
+     *
+     * @param signupdto
+     * @return
+     */
     public String userSignup(Signupdto signupdto){
     if(userRepo.existsByEmail(signupdto.getEmail())){
         return "{\"error\": \"Email already registered\"}";
@@ -36,6 +46,12 @@ public class UserService {
         return "{\"message\": \"User signed up successfully!\"}";
     }
 
+    /**
+     * logic for login for signed up user
+     * @param logindto
+     * @return
+     * @throws JsonProcessingException
+     */
     public String login(Logindto logindto) throws JsonProcessingException {
         // Check if email or password is blank
         if (logindto.getEmail().isBlank() || logindto.getPassword().isBlank()) {
@@ -45,7 +61,7 @@ public class UserService {
         // Find user by email
         Users user = userRepo.findByEmail(logindto.getEmail());
         if (user == null) {
-            throw new IllegalArgumentException("User not found");
+            throw new NullPointerException("User not found");
         }
 
         // Check if the password matches
@@ -57,7 +73,11 @@ public class UserService {
         return "{\"user\": " + new ObjectMapper().writeValueAsString(user) + "}";
     }
 
-
+    /**
+     * Logic for updating roles by admin for a user
+     * @param roledetailsDTO
+     * @return
+     */
     public String updateRoles(RoledetailsDTO roledetailsDTO) {
         if(roledetailsDTO.getRole().equals(Roles.ADMIN)) {
             if (roledetailsDTO.getRole().isBlank() || roledetailsDTO.getEmail().isBlank()) {
@@ -82,6 +102,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Logic for deleting a user by ADMIN
+     * @param email
+     * @param roledetailsDTO
+     * @return
+     */
     public String deleteUsers(String email,RoledetailsDTO roledetailsDTO) {
         if(roledetailsDTO.getRole().equals(Roles.ADMIN)){
             Users user=userRepo.findByEmail(email);

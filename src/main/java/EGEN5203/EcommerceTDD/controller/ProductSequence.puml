@@ -1,0 +1,41 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+' ==== Layers ====
+package "Controller Layer" {
+  [UserController]
+  [ProductController]
+}
+
+package "Service Layer" {
+  [UserService]
+  [UserServiceImpl]
+  [ProductService]
+  [ProductServiceImpl]
+}
+
+
+package "Entity Layer" {
+  [Users]
+  [Product]
+  [Order]
+}
+
+
+
+' ==== Relationships - User module ====
+[UserController] --> [UserService]
+[UserServiceImpl] --> [UserRepository]
+[UserServiceImpl] --> [SignupDTO]
+[UserServiceImpl] --> [LoginDTO]
+
+
+' ==== Relationships - Product module ====
+[ProductController] --> [ProductService]
+[ProductServiceImpl] --> [ProductRepository]
+[ProductServiceImpl] --> [AddProductsDto]
+[ProductServiceImpl] --> [UpdateProductsDto]
+
+
+@enduml

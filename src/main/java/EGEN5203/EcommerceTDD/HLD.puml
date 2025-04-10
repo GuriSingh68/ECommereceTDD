@@ -1,0 +1,130 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam classAttributeIconSize 0
+
+' Cart Service
+class CartController {
+  +create(createCartDto: AddToCartDto): Cart
+  +findAll(): List<Cart>
+  +findOne(id: Long): Cart
+  +update(id: Long, updateCartDto: UpdateCartDto): Cart
+  +remove(id: Long): void
+}
+
+class CartService {
+  +createCart(createCartDto: AddToCartDto): Cart
+  +findAll(): List<Cart>
+  +findOne(id: Long): Cart
+  +updateCart(id: Long, updateCartDto: UpdateCartDto): Cart
+  +deleteCart(id: Long): void
+}
+
+class Cart {
+  -id: Long
+  -customer: Users
+  -items: List<CartItem>
+}
+
+class CartItem {
+  -id: Long
+  -cart: Cart
+  -product: Product
+  -quantity: Integer
+}
+
+' Product Service
+class ProductController {
+  +viewAllProducts(): List<Product>
+  +addProducts(addProductsDTO: AddProductsDto, username: String): String
+  +updateProduct(id: Long, updateProductsDTO: UpdateProductsDto, username: String): String
+  +deleteProduct(id: Long, username: String): String
+}
+
+class ProductService {
+  +fetchAllProducts(): List<Product>
+  +addProducts(username: String, addProductsDTO: AddProductsDto): String
+  +updateProduct(id: Long, username: String, updateProductsDTO: UpdateProductsDto): String
+  +deleteProduct(id: Long, username: String): String
+}
+
+class Product {
+  -productId: Long
+  -name: String
+  -description: String
+  -price: Double
+  -stock: Integer
+  -category: String
+  -imageUrl: String
+  -tags: List<String>
+}
+
+' Order Service
+class OrderController {
+  +createOrder(createOrderDto: CreateOrderDto, userId: Long): Order
+  +getOrdersByAdmin(adminId: Long): List<Order>
+  +getCustomerOrders(customerId: Long): List<Order>
+}
+
+class OrderService {
+  +createOrder(createOrderDto: CreateOrderDto, userId: Long): Order
+  +findOrdersByAdminId(adminId: Long): List<Order>
+  +findOrdersByCustomerId(customerId: Long): List<Order>
+}
+
+class Order {
+  -id: Long
+  -totalPrice: Double
+  -customer: Users
+  -orderDate: LocalDateTime
+  -status: String
+}
+
+' Payment Service
+class PaymentService {
+  +processPayment(order: Order): Payments
+  +processCardPayment(cardNumber: String, cvv: String, amount: Double): Payments
+  +fetchAllDetails(): List<Payments>
+  +getPaymentsById(paymentId: Integer, userId: Long): Payments
+  +updatePaymentStatus(paymentId: Integer, userId: Long, status: UpdatePaymentStatusDto): Payments
+}
+
+class Payments {
+  -id: Integer
+  -amount: Double
+  -paymentMethod: String
+  -cardLastFour: String
+  -paymentDate: LocalDateTime
+  -status: String
+  -order: Order
+}
+
+' Users Entity
+class Users {
+  -userId: Long
+  -role: String
+  -email: String
+  -firstName: String
+  -lastName: String
+  -phoneNumber: String
+  -password: String
+}
+
+' Relationships
+CartController --> CartService
+CartService --> Cart
+CartService --> CartItem
+CartService --> Users
+
+ProductController --> ProductService
+ProductService --> Product
+
+OrderController --> OrderService
+OrderService --> Order
+OrderService --> Users
+
+PaymentService --> Payments
+PaymentService --> Order
+PaymentService --> Users
+PaymentService --> UpdatePaymentStatusDto
+Payments --> Order
+@enduml

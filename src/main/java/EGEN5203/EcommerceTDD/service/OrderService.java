@@ -21,17 +21,33 @@ import java.util.List;
 
 @Service
 public class OrderService {
+    /**
+     * User repository to connect with database
+     */
     @Autowired
     private UserRepo userRepo;
-
+    /**
+     * Product repository to connect with database
+     */
     @Autowired
     private ProductRepo productRepo;
-
+    /**
+     * Order repository to connect with database
+     */
     @Autowired
     private OrderRepo orderRepo;
+    /**
+     * Payment repository to connect with database
+     */
     @Autowired
         private PaymentRepo paymentRepo;
 
+    /**
+     * Logic for creating order
+     * @param createOrderDto
+     * @param userId
+     * @return
+     */
     @Transactional
     public Order createOrder(CreateOrderDto createOrderDto, Long userId) {
         // Validate user first
@@ -76,11 +92,19 @@ public class OrderService {
         return orderRepo.save(order);
     }
 
+    /**
+     * Logic to generate a transaction ID
+     * @return
+     */
     private String generateTransactionId() {
         return "TXN-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 10000);
     }
 
-    private void validateOrderItems(List<OrderItemsDto> orderItems) {
+    /**
+     * Logic to create order items
+     * @param orderItems
+     */
+    void validateOrderItems(List<OrderItemsDto> orderItems) {
         if (orderItems == null || orderItems.isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one product");
         }
@@ -104,15 +128,31 @@ public class OrderService {
         }
     }
 
+    /**
+     * List order items by customer id
+     * @param customerId
+     * @return
+     */
     public List<Order> findOrdersByCustomerId(Long customerId) {
         Users user = userRepo.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("User  not found"));
         return orderRepo.findByUserWithItems(user);
     }
 
+    /**
+     * List All orders for admin
+     * @param adminId
+     * @return
+     */
     public List<Order> findOrdersByAdminId(Long adminId) {
         return orderRepo.findOrdersByAdminId(adminId);
     }
+
+    /**
+     * Delete any order by id
+     * @param orderId
+     * @return
+     */
     public Order deleteOrder(Long orderId) {
         paymentRepo.deleteById(Math.toIntExact(orderId));
         Order order=orderRepo.findById((long) Math.toIntExact(orderId))
@@ -121,12 +161,32 @@ public class OrderService {
         orderRepo.deleteById(orderId);
         return order;
     }
+
+    /**
+     * Get list of all orders
+     * @param user
+     * @return
+     */
     public List<Order> getUserOrders(Users user) {
         return orderRepo.findByUser(user);
     }
+
+    /**
+     * Get all order details by Id and user de
+     * @param orderId
+     * @param user
+     * @return
+     */
     public Order getOrderDetails(Long orderId, Users user) {
         return orderRepo.findByIdAndUser(orderId, user);
     }
+
+    /**
+     * Change status of order to cacel or pending by user
+     * @param orderId
+     * @param user
+     * @return
+     */
     @Transactional
     public Order cancelOrder(Long orderId, Users user) {
         Order order = getOrderDetails(orderId, user);
@@ -146,6 +206,13 @@ public class OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         return orderRepo.save(order);
     }
+
+    /**
+     * Update order status of processed orders by user
+     * @param userId
+     * @param orderStatus
+     * @return
+     */
     public Order updateOrderStatus(Integer userId, UpdateOrdersDto orderStatus) {
         Users user=userRepo.findById(Long.valueOf(userId)).
                 orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -157,9 +224,20 @@ public class OrderService {
         }
         throw new IllegalArgumentException("You are not authorised to update order status");
     }
+
+    /**
+     * List all orders
+     * @return
+     */
     public List<Order> getAllOrders() {
         return orderRepo.findAllOrdersWithItemsAndProducts();
     }
+
+    /**
+     * List orders by ID
+     * @param id
+     * @return
+     */
     public Order fetchOrdersById(Long id) {
         Order order=orderRepo.findById(id)
                 .orElseThrow(() ->
